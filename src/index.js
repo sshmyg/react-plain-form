@@ -1,5 +1,5 @@
-import Formax from './Formax';
-import withFormax from './withFormax';
+import Form from './Form';
+import withForm from './withForm';
 
-export default withFormax(Formax);
-export * from './withFormax';
+export default withForm(Form);
+export * from './withForm';

@@ -7,8 +7,8 @@ import {
     isEmpty
 } from './helpers';
 
-export default function withFormax(WrappedComponent) {
-    return class FormaxEnhancer extends Component {
+export default function withForm(WrappedComponent) {
+    return class FormEnhancer extends Component {
         static propTypes = {
             children: PropTypes.func,
             defaultValues: PropTypes.object,

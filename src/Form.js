@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
-export default function Formax({
+export default function Form({
     children,
     ...props
 }) {
@@ -16,6 +16,6 @@ export default function Formax({
     );
 }
 
-Formax.propTypes = {
+Form.propTypes = {
     children: PropTypes.func
 };
