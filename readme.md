@@ -2,6 +2,9 @@
 React simple form for everyday usage 😜
 
 
+# Demo
+[Simple example](https://codesandbox.io/s/2vx51qq50r)
+
 ## Parameters
 | Name | Type | Description |
 | ------------- | :-------------:| :----- |
