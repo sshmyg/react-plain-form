@@ -1,13 +1,13 @@
 {
     "name": "react-plain-form",
-    "version": "0.3.3",
+    "version": "0.3.4",
     "description": "React simple form for everyday usage 😜",
     "main": "./dist/index.js",
     "scripts": {
         "clear": "rm -rf dist node_modules",
         "start": "NODE_ENV=development npx webpack --watch --progress --hide-modules",
         "build": "NODE_ENV=production npx webpack --progress --hide-modules",
-        "postinstall": "npm run build"
+        "pub": "npm run build && npm publish"
     },
     "repository": {
         "type": "git",
