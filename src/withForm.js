@@ -12,18 +12,13 @@ export default function withForm(WrappedComponent) {
         static propTypes = {
             children: PropTypes.func,
             defaultValues: PropTypes.object,
-
             validateOnChange: PropTypes.bool,
-            validateOnBlur: PropTypes.bool,
-            validateOnFocus: PropTypes.bool,
             onSubmit: PropTypes.func,
             onValidation: PropTypes.func
         }
 
         static defaultProps = {
             validateOnChange: true,
-            validateOnBlur: true,
-            validateOnFocus: true,
             onSubmit: () => {},
             /**
              * On validation, invoke on every validation step (onChange, onSubmit, onBlur)
@@ -153,13 +148,16 @@ export default function withForm(WrappedComponent) {
             });
         }
 
-        handleChange = e => {
+        handleFieldEvents = e => {
             const {
                 setValue,
                 validateField
             } = this;
             const { validateOnChange } = this.props;
-            const { target } = e;
+            const {
+                target,
+                type: eventType
+            } = e;
             const {
                 name,
                 value,
@@ -174,8 +172,10 @@ export default function withForm(WrappedComponent) {
                 throw new Error('name required');
             }
 
+            const isValidate = eventType === 'change' ? validateOnChange : true;
+
             setValue(name, actualizedValue)
-                .then(() => validateOnChange && validateField(name, actualizedValue))
+                .then(() => isValidate && validateField(name, actualizedValue))
                 .catch(() => {});
         }
 
@@ -187,14 +187,11 @@ export default function withForm(WrappedComponent) {
                 validateFields
             } = this;
             const { onSubmit } = this.props;
-            const {
-                isErrors,
-                isValidating
-            } = this.state;
+            const { isErrors } = this.state;
             const formData = new FormData(e.target);
             const fields = [];
 
-            if (isErrors || isValidating) {
+            if (isErrors) {
                 return false;
             }
 
@@ -214,7 +211,9 @@ export default function withForm(WrappedComponent) {
             return {
                 values: this.getValues(),
                 setValue: this.setValue,
-                handleChange: this.handleChange,
+                handleChange: this.handleFieldEvents,
+                handleFocus: this.handleFieldEvents,
+                handleBlur: this.handleFieldEvents,
                 handleSubmit: this.handleSubmit,
                 ...this.state
             };
