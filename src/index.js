@@ -33,7 +33,7 @@ function useErrors() {
  * useField
  * @param {Object} props
  * @param {String|Number} [props.defaultValue = '']
- * @param {Function} [props.handleValidation = (name, value) => new Promise(res => res(true))]
+ * @param {Function} [props.handleValidation = values => Promise.resolve(true)]
  * @returns [
  *      {} //Valid DOM attrs,
  *      {} //Component props
@@ -42,10 +42,9 @@ function useErrors() {
 function useField(props) {
     const {
         defaultValue = '',
-        handleValidation = (values, name) => new Promise(res => res(true)),
+        handleValidation = () => Promise.resolve(true),
         ...rest
     } = props;
-    const { name } = rest;
     const [error, setError] = useState();
     const [value, setValue] = useState(String(defaultValue));
     const isActive = useRef(false);
@@ -75,7 +74,7 @@ function useField(props) {
             setError,
             setValue,
             isActive: isActive.current,
-            handleValidation: values => validateField(values, handleValidation, name)
+            handleValidation: (values, name) => validateField(values, handleValidation, name)
         }
     ];
 }
@@ -131,7 +130,7 @@ export function useForm(fieldsConfig) {
         setValidating(true);
         fieldsProps[actualCurrentName]
             .handleValidation(values)
-            .then(res => {
+            .then(() => {
                 setValidating(false);
             })
             .catch(errStr => {
@@ -140,17 +139,26 @@ export function useForm(fieldsConfig) {
             });
     }, [currentValue]);
 
-    console.info(isValidating);
-
     return {
         values,
         fields: fieldsAttrs,
         errors,
         isValidating,
         handleSubmit: () => {
-            /* Object.keys(fieldsProps).forEach(key =>
+            const validations = Object.keys(fieldsProps).map(key =>
                 fieldsProps[key].handleValidation(values)
-            ); */
+            );
+
+            setValidating(true);
+
+            Promise.all(validations)
+                .then(() => {
+                    setValidating(false);
+                })
+                .catch(err => {
+                    setValidating(false);
+                    setErors(err);
+                });
 
             return values;
         }

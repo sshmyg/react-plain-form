@@ -115,9 +115,7 @@ function validateField(values, handler, name) {
   var validationRes = handler(values, name);
 
   if (!isPromise(validationRes)) {
-    return new Promise(function (res, rej) {
-      rej("Check \"handleValidation\" for \"".concat(name, "\" it should return valid Promise object"));
-    });
+    return Promise.resolve();
   }
 
   return validationRes;
@@ -181,7 +179,7 @@ function useErrors() {
  * useField
  * @param {Object} props
  * @param {String|Number} [props.defaultValue = '']
- * @param {Function} [props.handleValidation = (name, value) => new Promise(res => res(true))]
+ * @param {Function} [props.handleValidation = values => Promise.resolve(true)]
  * @returns [
  *      {} //Valid DOM attrs,
  *      {} //Component props
@@ -193,14 +191,10 @@ function useField(props) {
   var _props$defaultValue = props.defaultValue,
       defaultValue = _props$defaultValue === void 0 ? '' : _props$defaultValue,
       _props$handleValidati = props.handleValidation,
-      _handleValidation = _props$handleValidati === void 0 ? function (values, name) {
-    return new Promise(function (res) {
-      return res(true);
-    });
+      _handleValidation = _props$handleValidati === void 0 ? function () {
+    return Promise.resolve(true);
   } : _props$handleValidati,
       rest = _objectWithoutProperties(props, ["defaultValue", "handleValidation"]);
-
-  var name = rest.name;
 
   var _useState3 = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(),
       _useState4 = _slicedToArray(_useState3, 2),
@@ -232,7 +226,7 @@ function useField(props) {
     setError: setError,
     setValue: setValue,
     isActive: isActive.current,
-    handleValidation: function handleValidation(values) {
+    handleValidation: function handleValidation(values, name) {
       return Object(_helpers__WEBPACK_IMPORTED_MODULE_1__["validateField"])(values, _handleValidation, name);
     }
   }];
@@ -293,23 +287,29 @@ function useForm(fieldsConfig) {
 
     var actualCurrentName = currentName || prevCurrentName;
     setValidating(true);
-    fieldsProps[actualCurrentName].handleValidation(values).then(function (res) {
+    fieldsProps[actualCurrentName].handleValidation(values).then(function () {
       setValidating(false);
     }).catch(function (errStr) {
       setValidating(false);
       setErors(_defineProperty({}, actualCurrentName, errStr));
     });
   }, [currentValue]);
-  console.info(isValidating);
   return {
     values: values,
     fields: fieldsAttrs,
     errors: errors,
     isValidating: isValidating,
     handleSubmit: function handleSubmit() {
-      /* Object.keys(fieldsProps).forEach(key =>
-          fieldsProps[key].handleValidation(values)
-      ); */
+      var validations = Object.keys(fieldsProps).map(function (key) {
+        return fieldsProps[key].handleValidation(values);
+      });
+      setValidating(true);
+      Promise.all(validations).then(function () {
+        setValidating(false);
+      }).catch(function (err) {
+        setValidating(false);
+        setErors(err);
+      });
       return values;
     }
   };
