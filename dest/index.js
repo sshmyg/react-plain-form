@@ -87,6 +87,32 @@ module.exports =
 /************************************************************************/
 /******/ ({
 
+/***/ "./src/helpers.js":
+/*!************************!*\
+  !*** ./src/helpers.js ***!
+  \************************/
+/*! exports provided: isPromise, isEqual, isEmpty */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isPromise", function() { return isPromise; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isEqual", function() { return isEqual; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isEmpty", function() { return isEmpty; });
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function isPromise(obj) {
+  return !!obj && (_typeof(obj) === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
+}
+function isEqual(obj, compareObj) {
+  return JSON.stringify(obj) === JSON.stringify(compareObj);
+}
+function isEmpty(obj) {
+  return Object.keys(obj).length === 0;
+}
+
+/***/ }),
+
 /***/ "./src/index.js":
 /*!**********************!*\
   !*** ./src/index.js ***!
@@ -99,6 +125,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "useForm", function() { return useForm; });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _helpers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./helpers */ "./src/helpers.js");
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -116,27 +143,58 @@ function _objectWithoutProperties(source, excluded) { if (source == null) return
 function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
 
 
+
+
+function validateField(name, values, handler) {
+  var validationRes = handler(values, name);
+
+  if (!Object(_helpers__WEBPACK_IMPORTED_MODULE_1__["isPromise"])(validationRes)) {
+    return new Promise(function (res, rej) {
+      var isError = typeof validationRes === 'string';
+      var isSuccess = validationRes === true;
+      isError && rej(validationRes);
+      isSuccess && res(values);
+
+      if (!isError && !isSuccess) {
+        rej("\"handleValidation\" for \"".concat(name, "\" returns ").concat(validationRes, ", but should return string (if error) or true (if success)"));
+      }
+    });
+  }
+
+  return validationRes;
+}
+
+function usePrevious(value) {
+  var ref = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])();
+  Object(react__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(function () {
+    ref.current = value;
+  });
+  return ref.current;
+}
 /**
  * useField
  * @param {Object} props
  * @param {String|Number} [props.defaultValue = '']
- * @param {Function} [props.handleValidation = () => true]
+ * @param {Function} [props.handleValidation = (name, value) => new Promise(res => res(true))]
  * @returns [
  *      {} //Valid DOM attrs,
  *      {} //Component props
  * ]
  */
 
+
 function useField(props) {
-  var _props$type = props.type,
-      type = _props$type === void 0 ? 'text' : _props$type,
-      _props$defaultValue = props.defaultValue,
+  var _props$defaultValue = props.defaultValue,
       defaultValue = _props$defaultValue === void 0 ? '' : _props$defaultValue,
       _props$handleValidati = props.handleValidation,
-      handleValidation = _props$handleValidati === void 0 ? function () {
-    return true;
+      _handleValidation = _props$handleValidati === void 0 ? function (name, value) {
+    return new Promise(function (res) {
+      return res(true);
+    });
   } : _props$handleValidati,
-      rest = _objectWithoutProperties(props, ["type", "defaultValue", "handleValidation"]);
+      rest = _objectWithoutProperties(props, ["defaultValue", "handleValidation"]);
+
+  var name = rest.name;
 
   var _useState = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(),
       _useState2 = _slicedToArray(_useState, 2),
@@ -148,22 +206,33 @@ function useField(props) {
       value = _useState4[0],
       setValue = _useState4[1];
 
+  var isActive = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(false);
   return [//Valid DOM attrs
   _objectSpread({
-    type: type,
     value: value
   }, rest, {
     onChange: function onChange(e) {
       setValue(e.target.value);
     },
-    onBlur: function onBlur(e) {},
-    onFocus: function onFocus(e) {}
+    onBlur: function onBlur(e) {
+      isActive.current = false;
+    },
+    onFocus: function onFocus(e) {
+      isActive.current = true;
+    }
   }), //Component props
   {
     error: error,
     setError: setError,
     setValue: setValue,
-    handleValidation: handleValidation
+    isActive: isActive.current,
+    handleValidation: function handleValidation(values) {
+      return validateField(name, values, _handleValidation).then(function (r) {
+        return console.info(r, 'res');
+      }).catch(function (e) {
+        return console.info(e, 'error');
+      });
+    }
   }];
 }
 /**
@@ -172,34 +241,54 @@ function useField(props) {
  */
 
 
-function useForm(fields) {
-  var res = Object.keys(fields).reduce(function (acc, name) {
-    var field = fields[name];
+function useForm(fieldsConfig) {
+  var isMount = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(false);
+  var res = Object.keys(fieldsConfig).reduce(function (acc, name) {
+    var field = fieldsConfig[name];
 
-    var _useField = useField(field),
+    var _useField = useField(_objectSpread({
+      name: name
+    }, field)),
         _useField2 = _slicedToArray(_useField, 2),
         attrs = _useField2[0],
         props = _useField2[1];
 
-    acc.fields[name] = attrs;
+    var isActive = props.isActive;
+    acc.fieldsAttrs[name] = attrs;
+    acc.fieldsProps[name] = props;
     acc.values[name] = attrs.value;
-    acc.validations.push(props.handleValidation);
+    isActive && (acc.currentName = name);
     return acc;
   }, {
-    fields: {},
-    values: {},
-    validations: []
+    currentName: undefined,
+    fieldsAttrs: {},
+    fieldsProps: {},
+    values: {}
   });
-  return _objectSpread({}, res, {
+  var fieldsAttrs = res.fieldsAttrs,
+      fieldsProps = res.fieldsProps,
+      values = res.values,
+      currentName = res.currentName;
+  var currentValue = values[currentName];
+  Object(react__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(function () {
+    //Skip validation on field mount
+    if (!isMount.current) {
+      isMount.current = true;
+      return;
+    }
+
+    fieldsProps[currentName].handleValidation(values);
+  }, [currentValue]);
+  return {
+    values: values,
+    fields: fieldsAttrs,
     handleSubmit: function handleSubmit() {
-      var values = res.values,
-          validations = res.validations;
-      validations.forEach(function (validate) {
-        return validate(values);
+      Object.keys(fieldsProps).forEach(function (key) {
+        return fieldsProps[key].handleValidation(values);
       });
       return values;
     }
-  });
+  };
 }
 
 /***/ }),
