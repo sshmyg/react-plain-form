@@ -91,7 +91,7 @@ module.exports =
 /*!************************!*\
   !*** ./src/helpers.js ***!
   \************************/
-/*! exports provided: isPromise, isEqual, isEmpty */
+/*! exports provided: isPromise, isEqual, isEmpty, validateField */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -99,6 +99,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isPromise", function() { return isPromise; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isEqual", function() { return isEqual; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isEmpty", function() { return isEmpty; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "validateField", function() { return validateField; });
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function isPromise(obj) {
@@ -109,6 +110,17 @@ function isEqual(obj, compareObj) {
 }
 function isEmpty(obj) {
   return Object.keys(obj).length === 0;
+}
+function validateField(values, handler, name) {
+  var validationRes = handler(values, name);
+
+  if (!isPromise(validationRes)) {
+    return new Promise(function (res, rej) {
+      rej("Check \"handleValidation\" for \"".concat(name, "\" it should return valid Promise object"));
+    });
+  }
+
+  return validationRes;
 }
 
 /***/ }),
@@ -126,6 +138,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _helpers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./helpers */ "./src/helpers.js");
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -138,31 +154,8 @@ function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = 
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
-
-function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
 
 
-
-
-function validateField(name, values, handler) {
-  var validationRes = handler(values, name);
-
-  if (!Object(_helpers__WEBPACK_IMPORTED_MODULE_1__["isPromise"])(validationRes)) {
-    return new Promise(function (res, rej) {
-      var isError = typeof validationRes === 'string';
-      var isSuccess = validationRes === true;
-      isError && rej(validationRes);
-      isSuccess && res(values);
-
-      if (!isError && !isSuccess) {
-        rej("\"handleValidation\" for \"".concat(name, "\" returns ").concat(validationRes, ", but should return string (if error) or true (if success)"));
-      }
-    });
-  }
-
-  return validationRes;
-}
 
 function usePrevious(value) {
   var ref = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])();
@@ -170,6 +163,19 @@ function usePrevious(value) {
     ref.current = value;
   });
   return ref.current;
+}
+
+function useErrors() {
+  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])({}),
+      _useState2 = _slicedToArray(_useState, 2),
+      errors = _useState2[0],
+      setErors = _useState2[1];
+
+  var customSetErrors = function customSetErrors(customErrors) {
+    return setErors(_objectSpread({}, errors, customErrors));
+  };
+
+  return [errors, customSetErrors];
 }
 /**
  * useField
@@ -187,7 +193,7 @@ function useField(props) {
   var _props$defaultValue = props.defaultValue,
       defaultValue = _props$defaultValue === void 0 ? '' : _props$defaultValue,
       _props$handleValidati = props.handleValidation,
-      _handleValidation = _props$handleValidati === void 0 ? function (name, value) {
+      _handleValidation = _props$handleValidati === void 0 ? function (values, name) {
     return new Promise(function (res) {
       return res(true);
     });
@@ -196,15 +202,15 @@ function useField(props) {
 
   var name = rest.name;
 
-  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(),
-      _useState2 = _slicedToArray(_useState, 2),
-      error = _useState2[0],
-      setError = _useState2[1];
-
-  var _useState3 = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(String(defaultValue)),
+  var _useState3 = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(),
       _useState4 = _slicedToArray(_useState3, 2),
-      value = _useState4[0],
-      setValue = _useState4[1];
+      error = _useState4[0],
+      setError = _useState4[1];
+
+  var _useState5 = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(String(defaultValue)),
+      _useState6 = _slicedToArray(_useState5, 2),
+      value = _useState6[0],
+      setValue = _useState6[1];
 
   var isActive = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(false);
   return [//Valid DOM attrs
@@ -227,11 +233,7 @@ function useField(props) {
     setValue: setValue,
     isActive: isActive.current,
     handleValidation: function handleValidation(values) {
-      return validateField(name, values, _handleValidation).then(function (r) {
-        return console.info(r, 'res');
-      }).catch(function (e) {
-        return console.info(e, 'error');
-      });
+      return Object(_helpers__WEBPACK_IMPORTED_MODULE_1__["validateField"])(values, _handleValidation, name);
     }
   }];
 }
@@ -242,7 +244,18 @@ function useField(props) {
 
 
 function useForm(fieldsConfig) {
+  var _useErrors = useErrors(),
+      _useErrors2 = _slicedToArray(_useErrors, 2),
+      errors = _useErrors2[0],
+      setErors = _useErrors2[1];
+
   var isMount = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(false);
+
+  var _useState7 = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(false),
+      _useState8 = _slicedToArray(_useState7, 2),
+      isValidating = _useState8[0],
+      setValidating = _useState8[1];
+
   var res = Object.keys(fieldsConfig).reduce(function (acc, name) {
     var field = fieldsConfig[name];
 
@@ -270,6 +283,7 @@ function useForm(fieldsConfig) {
       values = res.values,
       currentName = res.currentName;
   var currentValue = values[currentName];
+  var prevCurrentName = usePrevious(currentName);
   Object(react__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(function () {
     //Skip validation on field mount
     if (!isMount.current) {
@@ -277,15 +291,25 @@ function useForm(fieldsConfig) {
       return;
     }
 
-    fieldsProps[currentName].handleValidation(values);
+    var actualCurrentName = currentName || prevCurrentName;
+    setValidating(true);
+    fieldsProps[actualCurrentName].handleValidation(values).then(function (res) {
+      setValidating(false);
+    }).catch(function (errStr) {
+      setValidating(false);
+      setErors(_defineProperty({}, actualCurrentName, errStr));
+    });
   }, [currentValue]);
+  console.info(isValidating);
   return {
     values: values,
     fields: fieldsAttrs,
+    errors: errors,
+    isValidating: isValidating,
     handleSubmit: function handleSubmit() {
-      Object.keys(fieldsProps).forEach(function (key) {
-        return fieldsProps[key].handleValidation(values);
-      });
+      /* Object.keys(fieldsProps).forEach(key =>
+          fieldsProps[key].handleValidation(values)
+      ); */
       return values;
     }
   };

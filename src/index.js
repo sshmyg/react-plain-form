@@ -4,27 +4,7 @@ import {
     useRef
 } from 'react';
 
-import { isPromise } from './helpers';
-
-function validateField(name, values, handler) {
-    const validationRes = handler(values, name);
-
-    if (!isPromise(validationRes)) {
-        return new Promise((res, rej) => {
-            const isError = typeof validationRes === 'string';
-            const isSuccess = validationRes === true;
-
-            isError && rej(validationRes);
-            isSuccess && res(values);
-
-            if (!isError && !isSuccess) {
-                rej(`"handleValidation" for "${name}" returns ${validationRes}, but should return string (if error) or true (if success)`);
-            }
-        });
-    }
-
-    return validationRes;
-}
+import { validateField } from './helpers';
 
 function usePrevious(value) {
     const ref = useRef();
@@ -34,6 +14,19 @@ function usePrevious(value) {
     });
 
     return ref.current;
+}
+
+function useErrors() {
+    const [errors, setErors] = useState({});
+    const customSetErrors = customErrors => setErors({
+        ...errors,
+        ...customErrors
+    });
+
+    return [
+        errors,
+        customSetErrors
+    ];
 }
 
 /**
@@ -49,7 +42,7 @@ function usePrevious(value) {
 function useField(props) {
     const {
         defaultValue = '',
-        handleValidation = (name, value) => new Promise(res => res(true)),
+        handleValidation = (values, name) => new Promise(res => res(true)),
         ...rest
     } = props;
     const { name } = rest;
@@ -82,9 +75,7 @@ function useField(props) {
             setError,
             setValue,
             isActive: isActive.current,
-            handleValidation: values => validateField(name, values, handleValidation)
-                .then(r => console.info(r, 'res'))
-                .catch(e => console.info(e, 'error'))
+            handleValidation: values => validateField(values, handleValidation, name)
         }
     ];
 }
@@ -94,7 +85,9 @@ function useField(props) {
  * @param {Array} fields
  */
 export function useForm(fieldsConfig) {
+    const [errors, setErors] = useErrors();
     const isMount = useRef(false);
+    const [isValidating, setValidating] = useState(false);
     const res = Object.keys(fieldsConfig).reduce((acc, name) => {
         const field = fieldsConfig[name];
 
@@ -124,6 +117,7 @@ export function useForm(fieldsConfig) {
         currentName
     } = res;
     const currentValue = values[currentName];
+    const prevCurrentName = usePrevious(currentName);
 
     useEffect(() => {
         //Skip validation on field mount
@@ -132,16 +126,31 @@ export function useForm(fieldsConfig) {
             return;
         }
 
-        fieldsProps[currentName].handleValidation(values);
+        const actualCurrentName = currentName || prevCurrentName;
+
+        setValidating(true);
+        fieldsProps[actualCurrentName]
+            .handleValidation(values)
+            .then(res => {
+                setValidating(false);
+            })
+            .catch(errStr => {
+                setValidating(false);
+                setErors({ [actualCurrentName]: errStr });
+            });
     }, [currentValue]);
+
+    console.info(isValidating);
 
     return {
         values,
         fields: fieldsAttrs,
+        errors,
+        isValidating,
         handleSubmit: () => {
-            Object.keys(fieldsProps).forEach(key =>
+            /* Object.keys(fieldsProps).forEach(key =>
                 fieldsProps[key].handleValidation(values)
-            );
+            ); */
 
             return values;
         }
