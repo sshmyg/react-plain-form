@@ -4,7 +4,10 @@ import {
     useRef
 } from 'react';
 
-import { validateField } from './helpers';
+import {
+    validateField,
+    filterObjectByEmptyValues
+} from './helpers';
 
 function usePrevious(value) {
     const ref = useRef();
@@ -17,14 +20,18 @@ function usePrevious(value) {
 }
 
 function useErrors() {
-    const [errors, setErors] = useState({});
-    const customSetErrors = customErrors => setErors({
-        ...errors,
-        ...customErrors
-    });
+    const [errors, setErrors] = useState({});
+    const customSetErrors = currentErrors => setErrors(prevErrors =>
+        filterObjectByEmptyValues({
+            ...prevErrors,
+            ...currentErrors
+        })
+    );
+    const customSetError = (name, value) => customSetErrors({ [name]: value });
 
     return [
         errors,
+        customSetError,
         customSetErrors
     ];
 }
@@ -33,7 +40,7 @@ function useErrors() {
  * useField
  * @param {Object} props
  * @param {String|Number} [props.defaultValue = '']
- * @param {Function} [props.handleValidation = values => Promise.resolve(true)]
+ * @param {Function} [props.onValidate = values => Promise.resolve(true)]
  * @returns [
  *      {} //Valid DOM attrs,
  *      {} //Component props
@@ -42,10 +49,9 @@ function useErrors() {
 function useField(props) {
     const {
         defaultValue = '',
-        handleValidation = () => Promise.resolve(true),
+        onValidate = () => Promise.resolve(true),
         ...rest
     } = props;
-    const [error, setError] = useState();
     const [value, setValue] = useState(String(defaultValue));
     const isActive = useRef(false);
 
@@ -56,25 +62,24 @@ function useField(props) {
             ...rest,
 
             onChange: e => {
+                console.info('123123');
                 setValue(e.target.value);
             },
 
-            onBlur: e => {
+            onBlur: () => {
                 isActive.current = false;
             },
 
-            onFocus: e => {
+            onFocus: () => {
                 isActive.current = true;
             }
         },
 
         //Component props
         {
-            error,
-            setError,
             setValue,
-            isActive: isActive.current,
-            handleValidation: (values, name) => validateField(values, handleValidation, name)
+            onValidate,
+            isActive: isActive.current
         }
     ];
 }
@@ -84,7 +89,7 @@ function useField(props) {
  * @param {Array} fields
  */
 export function useForm(fieldsConfig) {
-    const [errors, setErors] = useErrors();
+    const [errors, setError, setErrors] = useErrors();
     const isMount = useRef(false);
     const [isValidating, setValidating] = useState(false);
     const res = Object.keys(fieldsConfig).reduce((acc, name) => {
@@ -108,7 +113,6 @@ export function useForm(fieldsConfig) {
         fieldsProps: {},
         values: {}
     });
-
     const {
         fieldsAttrs,
         fieldsProps,
@@ -117,6 +121,11 @@ export function useForm(fieldsConfig) {
     } = res;
     const currentValue = values[currentName];
     const prevCurrentName = usePrevious(currentName);
+    //If fields is blured, than current name === last focused field;
+    const actualCurrentName = currentName || prevCurrentName;
+    const setValue = (name, value) => fieldsProps[name] && fieldsProps[name].setValue(value);
+
+    console.info(values, 'ppp');
 
     useEffect(() => {
         //Skip validation on field mount
@@ -125,17 +134,17 @@ export function useForm(fieldsConfig) {
             return;
         }
 
-        const actualCurrentName = currentName || prevCurrentName;
-
         setValidating(true);
+
         fieldsProps[actualCurrentName]
-            .handleValidation(values)
+            .onValidate(values)
             .then(() => {
                 setValidating(false);
+                setError(actualCurrentName);
             })
             .catch(errStr => {
                 setValidating(false);
-                setErors({ [actualCurrentName]: errStr });
+                setError(actualCurrentName, errStr);
             });
     }, [currentValue]);
 
@@ -144,23 +153,23 @@ export function useForm(fieldsConfig) {
         fields: fieldsAttrs,
         errors,
         isValidating,
-        handleSubmit: () => {
+        setError,
+        setValue
+        /* handleSubmit: () => {
             const validations = Object.keys(fieldsProps).map(key =>
-                fieldsProps[key].handleValidation(values)
+                fieldsProps[key].onValidate(values)
             );
 
             setValidating(true);
 
             Promise.all(validations)
-                .then(() => {
-                    setValidating(false);
-                })
+                .then(() => setValidating(false))
                 .catch(err => {
                     setValidating(false);
-                    setErors(err);
+                    setErrors(err);
                 });
 
             return values;
-        }
+        } */
     };
 }
