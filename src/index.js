@@ -4,10 +4,7 @@ import {
     useRef
 } from 'react';
 
-import {
-    validateField,
-    filterObjectByEmptyValues
-} from './helpers';
+import { filterObjectByEmptyValues } from './helpers';
 
 function usePrevious(value) {
     const ref = useRef();
@@ -40,7 +37,7 @@ function useErrors() {
  * useField
  * @param {Object} props
  * @param {String|Number} [props.defaultValue = '']
- * @param {Function} [props.onValidate = values => Promise.resolve(true)]
+ * @param {Function} [props.onValidate]
  * @returns [
  *      {} //Valid DOM attrs,
  *      {} //Component props
@@ -49,11 +46,20 @@ function useErrors() {
 function useField(props) {
     const {
         defaultValue = '',
-        onValidate = () => Promise.resolve(true),
+        onValidate,
+        ref,
+        onChange,
+        onFocus,
+        onBlur,
         ...rest
     } = props;
     const [value, setValue] = useState(String(defaultValue));
     const isActive = useRef(false);
+    const inputRef = useRef();
+    const setValueWrapper = (...args) => {
+        inputRef.current && inputRef.current.focus();
+        setValue(...args);
+    };
 
     return [
         //Valid DOM attrs
@@ -61,25 +67,36 @@ function useField(props) {
             value,
             ...rest,
 
+            ref: el => {
+                inputRef.current = el;
+                ref && ref.current && (ref.current = el);
+            },
+
             onChange: e => {
-                console.info('123123');
                 setValue(e.target.value);
+
+                typeof onChange === 'function' && onChange(e);
             },
 
-            onBlur: () => {
-                isActive.current = false;
-            },
-
-            onFocus: () => {
+            onFocus: e => {
                 isActive.current = true;
+
+                typeof onFocus === 'function' && onFocus(e);
+            },
+
+            onBlur: e => {
+                isActive.current = false;
+
+                typeof onBlur === 'function' && onBlur(e);
             }
         },
 
         //Component props
         {
-            setValue,
             onValidate,
-            isActive: isActive.current
+            setValue: setValueWrapper,
+            isActive: isActive.current,
+            ref: inputRef
         }
     ];
 }
@@ -94,7 +111,6 @@ export function useForm(fieldsConfig) {
     const [isValidating, setValidating] = useState(false);
     const res = Object.keys(fieldsConfig).reduce((acc, name) => {
         const field = fieldsConfig[name];
-
         const [attrs, props] = useField({
             name,
             ...field
@@ -125,8 +141,6 @@ export function useForm(fieldsConfig) {
     const actualCurrentName = currentName || prevCurrentName;
     const setValue = (name, value) => fieldsProps[name] && fieldsProps[name].setValue(value);
 
-    console.info(values, 'ppp');
-
     useEffect(() => {
         //Skip validation on field mount
         if (!isMount.current) {
@@ -134,9 +148,15 @@ export function useForm(fieldsConfig) {
             return;
         }
 
+        const field = fieldsProps[actualCurrentName];
+
+        if (!field || !field.onValidate) {
+            return;
+        }
+
         setValidating(true);
 
-        fieldsProps[actualCurrentName]
+        field
             .onValidate(values)
             .then(() => {
                 setValidating(false);
