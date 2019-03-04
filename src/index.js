@@ -1,10 +1,13 @@
 import {
     useState,
     useEffect,
-    useRef
+    useRef,
+    useMemo
 } from 'react';
 
-import { filterObjectByEmptyValues } from './helpers';
+import {
+    filterObjectByEmptyValues
+} from './helpers';
 
 function usePrevious(value) {
     const ref = useRef();
@@ -33,113 +36,141 @@ function useErrors() {
     ];
 }
 
-/**
- * useField
- * @param {Object} props
- * @param {String|Number} [props.defaultValue = '']
- * @param {Function} [props.onValidate]
- * @returns [
- *      {} //Valid DOM attrs,
- *      {} //Component props
- * ]
- */
-function useField(props) {
-    const {
-        defaultValue = '',
-        onValidate,
-        ref,
-        onChange,
-        onFocus,
-        onBlur,
-        ...rest
-    } = props;
-    const [value, setValue] = useState(String(defaultValue));
-    const isActive = useRef(false);
-    const inputRef = useRef();
-    const setValueWrapper = (...args) => {
-        inputRef.current && inputRef.current.focus();
-        setValue(...args);
-    };
+function useValues(fieldsConfig) {
+    const [values, setValues] = useState(() => {
+        return Object.keys(fieldsConfig).reduce((acc, name) => {
+            const { defaultValue = '' } = fieldsConfig[name];
+
+            acc[name] = defaultValue;
+
+            return acc;
+        }, {});
+    });
+    const setValuesCustom = (newValues = {}) => setValues(prevValues => ({
+        ...prevValues,
+        ...newValues
+    }));
+    const setValue = (name, value) => setValuesCustom({ [name]: value });
 
     return [
-        //Valid DOM attrs
-        {
-            value,
-            ...rest,
+        values,
+        setValuesCustom,
+        setValue
+    ];
+}
 
-            ref: el => {
-                inputRef.current = el;
-                ref && ref.current && (ref.current = el);
-            },
+function useUid() {
+    const [uid, updateUid] = useState(Date.now());
 
-            onChange: e => {
-                setValue(e.target.value);
+    return [
+        uid,
+        () => updateUid(Date.now())
+    ];
+}
 
-                typeof onChange === 'function' && onChange(e);
-            },
+function useEventUid() {
+    const [eventData, set] = useState({});
 
-            onFocus: e => {
-                isActive.current = true;
-
-                typeof onFocus === 'function' && onFocus(e);
-            },
-
-            onBlur: e => {
-                isActive.current = false;
-
-                typeof onBlur === 'function' && onBlur(e);
-            }
-        },
-
-        //Component props
-        {
-            onValidate,
-            setValue: setValueWrapper,
-            isActive: isActive.current,
-            ref: inputRef
+    return [
+        eventData,
+        type => {
+            set({
+                type,
+                uid: Date.now()
+            });
         }
     ];
 }
 
 /**
  * useForm
- * @param {Array} fields
+ * @param {Object} fieldsConfig
  */
 export function useForm(fieldsConfig) {
+    const [fieldsUid, updateFieldsUid] = useUid();
+    const [eventData, updateEvent] = useEventUid();
+    const [userFields, updateUserFields] = useState(fieldsConfig);
+    const [values, setValues, setValue] = useValues(fieldsConfig);
+    const [activeName, setActiveName] = useState();
     const [errors, setError, setErrors] = useErrors();
-    const isMount = useRef(false);
     const [isValidating, setValidating] = useState(false);
-    const res = Object.keys(fieldsConfig).reduce((acc, name) => {
-        const field = fieldsConfig[name];
-        const [attrs, props] = useField({
-            name,
-            ...field
-        });
-        const { isActive } = props;
+    const isMount = useRef(false);
+    const prevActiveName = usePrevious(activeName, true);
 
-        acc.fieldsAttrs[name] = attrs;
-        acc.fieldsProps[name] = props;
-        acc.values[name] = attrs.value;
-        isActive && (acc.currentName = name);
-
-        return acc;
-    }, {
-        currentName: undefined,
-        fieldsAttrs: {},
-        fieldsProps: {},
-        values: {}
-    });
     const {
         fieldsAttrs,
-        fieldsProps,
-        values,
-        currentName
-    } = res;
-    const currentValue = values[currentName];
-    const prevCurrentName = usePrevious(currentName);
-    //If fields is blured, than current name === last focused field;
-    const actualCurrentName = currentName || prevCurrentName;
-    const setValue = (name, value) => fieldsProps[name] && fieldsProps[name].setValue(value);
+        fieldsProps
+    } = useMemo(() => {
+        return Object.keys(userFields).reduce((acc, name) => {
+            const {
+                //Attrs
+                ref,
+                onChange,
+                onFocus,
+                onBlur,
+                //Props
+                onValidate,
+                validateOn = 'change',
+                defaultValue = '',
+
+                ...rest
+            } = userFields[name];
+            const value = values[name];
+
+            acc.fieldsAttrs[name] = {
+                name,
+                value,
+                ...rest,
+
+                /* ref: el => {
+                    inputRef.current = el;
+                    ref && ref.current && (ref.current = el);
+                }, */
+
+                onChange: e => {
+                    setValue(name, e.target.value);
+
+                    updateEvent('change');
+
+                    typeof onChange === 'function' && onChange(e);
+                },
+
+                onFocus: e => {
+                    setActiveName(name);
+
+                    updateEvent('focus');
+
+                    typeof onFocus === 'function' && onFocus(e);
+                },
+
+                onBlur: e => {
+                    setActiveName();
+
+                    updateEvent('blur');
+
+                    typeof onBlur === 'function' && onBlur(e);
+                }
+            };
+
+            acc.fieldsProps[name] = {
+                onValidate,
+                validateOn,
+                defaultValue
+            };
+
+            return acc;
+        }, {
+            fieldsAttrs: {},
+            fieldsProps: {}
+        });
+    }, [fieldsUid]);
+    const activeFieldAttrs = fieldsAttrs[activeName];
+
+    console.info(prevActiveName, activeName);
+
+    if (activeFieldAttrs) {
+        activeFieldAttrs.value = values[activeName];
+    }
 
     useEffect(() => {
         //Skip validation on field mount
@@ -148,25 +179,34 @@ export function useForm(fieldsConfig) {
             return;
         }
 
-        const field = fieldsProps[actualCurrentName];
+        const { type } = eventData;
+        //If fields is blured, than current name === last focused field;
+        const actualCurrentName = type === 'blur'
+            ? prevActiveName
+            : activeName;
+        const {
+            onValidate,
+            validateOn
+        } = fieldsProps[actualCurrentName] || {};
 
-        if (!field || !field.onValidate) {
+        const isValidation = (new RegExp(type)).test(validateOn);
+
+        if (typeof onValidate !== 'function' || !isValidation || isValidating) {
             return;
         }
 
         setValidating(true);
 
-        field
-            .onValidate(values)
+        onValidate(values)
             .then(() => {
                 setValidating(false);
-                setError(actualCurrentName);
+                setError(name);
             })
             .catch(errStr => {
                 setValidating(false);
-                setError(actualCurrentName, errStr);
+                setError(name, errStr);
             });
-    }, [currentValue]);
+    }, [eventData.uid]);
 
     return {
         values,
