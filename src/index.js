@@ -2,7 +2,8 @@ import {
     useState,
     useEffect,
     useRef,
-    useMemo
+    useMemo,
+    createRef
 } from 'react';
 
 import {
@@ -54,7 +55,6 @@ function useValues(fieldsConfig) {
 
     return [
         values,
-        setValuesCustom,
         setValue
     ];
 }
@@ -90,13 +90,12 @@ export function useForm(fieldsConfig) {
     const [fieldsUid, updateFieldsUid] = useUid();
     const [eventData, updateEvent] = useEventUid();
     const [userFields, updateUserFields] = useState(fieldsConfig);
-    const [values, setValues, setValue] = useValues(fieldsConfig);
+    const [values, setValue] = useValues(fieldsConfig);
     const [activeName, setActiveName] = useState();
     const [errors, setError, setErrors] = useErrors();
     const [isValidating, setValidating] = useState(false);
     const isMount = useRef(false);
     const prevActiveName = usePrevious(activeName, true);
-
     const {
         fieldsAttrs,
         fieldsProps
@@ -116,16 +115,17 @@ export function useForm(fieldsConfig) {
                 ...rest
             } = userFields[name];
             const value = values[name];
+            const inputRef = createRef();
 
             acc.fieldsAttrs[name] = {
                 name,
                 value,
                 ...rest,
 
-                /* ref: el => {
+                ref: el => {
                     inputRef.current = el;
                     ref && ref.current && (ref.current = el);
-                }, */
+                },
 
                 onChange: e => {
                     setValue(name, e.target.value);
@@ -155,7 +155,8 @@ export function useForm(fieldsConfig) {
             acc.fieldsProps[name] = {
                 onValidate,
                 validateOn,
-                defaultValue
+                defaultValue,
+                ref: inputRef
             };
 
             return acc;
@@ -165,9 +166,18 @@ export function useForm(fieldsConfig) {
         });
     }, [fieldsUid]);
     const activeFieldAttrs = fieldsAttrs[activeName];
+    const setValueCustom = (name, value) => {
+        const { ref } = fieldsProps[name] || {};
 
-    console.info(prevActiveName, activeName);
+        ref
+            && ref.current
+            && ref.current.focus();
 
+        setValue(name, value);
+        updateEvent('change');
+    };
+
+    //Update value
     if (activeFieldAttrs) {
         activeFieldAttrs.value = values[activeName];
     }
@@ -214,7 +224,7 @@ export function useForm(fieldsConfig) {
         errors,
         isValidating,
         setError,
-        setValue
+        setValue: setValueCustom
         /* handleSubmit: () => {
             const validations = Object.keys(fieldsProps).map(key =>
                 fieldsProps[key].onValidate(values)
