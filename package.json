@@ -6,6 +6,8 @@
     "scripts": {
         "clear": "rm -rf dist node_modules",
         "start": "NODE_ENV=development npx webpack --watch --progress --hide-modules",
+        "test": "npx jest --coverage",
+        "test:watch": "npx jest --watch --coverage",
         "build": "NODE_ENV=production npx webpack --progress --hide-modules",
         "pub": "npm run build && npm publish"
     },
@@ -38,9 +40,17 @@
         "@babel/preset-react": "7.0.0",
         "babel-loader": "8.0.5",
         "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
+        "enzyme": "3.9.0",
+        "enzyme-adapter-react-16": "1.10.0",
+        "enzyme-to-json": "3.3.5",
+        "jest": "24.1.0",
+        "prop-types": "15.7.2",
+        "react": "16.8.3",
+        "react-dom": "16.8.3",
+        "react-hooks-testing-library": "0.3.6",
+        "react-testing-library": "6.0.0",
         "webpack": "4.29.6",
-        "webpack-cli": "3.2.3",
-        "prop-types": "15.7.2"
+        "webpack-cli": "3.2.3"
     },
     "peerDependencies": {
         "react": ">=16.8.0"
