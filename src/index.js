@@ -3,84 +3,23 @@ import {
     useEffect,
     useRef,
     useMemo,
-    createRef
+    createRef,
+    useCallback
 } from 'react';
 
-import {
-    filterObjectByEmptyValues
-} from './helpers';
+import usePrevious from './hooks/usePrevious';
+import useErrors from './hooks/useErrors';
+import useValues from './hooks/useValues';
+import useUid from './hooks/useUid';
+import useEventUid from './hooks/useEventUid';
+import useValidating from './hooks/useValidating';
 
-function usePrevious(value) {
-    const ref = useRef();
-
-    useEffect(() => {
-        ref.current = value;
-    });
-
-    return ref.current;
-}
-
-function useErrors() {
-    const [errors, setErrors] = useState({});
-    const customSetErrors = currentErrors => setErrors(prevErrors =>
-        filterObjectByEmptyValues({
-            ...prevErrors,
-            ...currentErrors
-        })
-    );
-    const customSetError = (name, value) => customSetErrors({ [name]: value });
-
-    return [
-        errors,
-        customSetError,
-        customSetErrors
-    ];
-}
-
-function useValues(fieldsConfig) {
-    const [values, setValues] = useState(() => {
-        return Object.keys(fieldsConfig).reduce((acc, name) => {
-            const { defaultValue = '' } = fieldsConfig[name];
-
-            acc[name] = defaultValue;
-
-            return acc;
-        }, {});
-    });
-    const setValuesCustom = (newValues = {}) => setValues(prevValues => ({
-        ...prevValues,
-        ...newValues
-    }));
-    const setValue = (name, value) => setValuesCustom({ [name]: value });
-
-    return [
-        values,
-        setValue
-    ];
-}
-
-function useUid() {
-    const [uid, updateUid] = useState(Date.now());
-
-    return [
-        uid,
-        () => updateUid(Date.now())
-    ];
-}
-
-function useEventUid() {
-    const [eventData, set] = useState({});
-
-    return [
-        eventData,
-        type => {
-            set({
-                type,
-                uid: Date.now()
-            });
-        }
-    ];
-}
+/*
+    TODO:
+    1. Update fields method
+    2. Method for validation all fields or isValid for each field,
+    3. isValidating for each field
+*/
 
 /**
  * useForm
@@ -93,7 +32,6 @@ export function useForm(fieldsConfig) {
     const [values, setValue] = useValues(fieldsConfig);
     const [activeName, setActiveName] = useState();
     const [errors, setError, setErrors] = useErrors();
-    const [isValidating, setValidating] = useState(false);
     const isMount = useRef(false);
     const prevActiveName = usePrevious(activeName, true);
     const {
@@ -165,8 +103,9 @@ export function useForm(fieldsConfig) {
             fieldsProps: {}
         });
     }, [fieldsUid]);
+    const [isValidating, setValidating] = useValidating();
     const activeFieldAttrs = fieldsAttrs[activeName];
-    const setValueCustom = (name, value) => {
+    const setValueCustom = useCallback((name, value) => {
         const { ref } = fieldsProps[name] || {};
 
         ref
@@ -175,7 +114,7 @@ export function useForm(fieldsConfig) {
 
         setValue(name, value);
         updateEvent('change');
-    };
+    }, []);
 
     //Update value
     if (activeFieldAttrs) {
@@ -198,23 +137,22 @@ export function useForm(fieldsConfig) {
             onValidate,
             validateOn
         } = fieldsProps[actualCurrentName] || {};
-
         const isValidation = (new RegExp(type)).test(validateOn);
 
         if (typeof onValidate !== 'function' || !isValidation || isValidating) {
             return;
         }
 
-        setValidating(true);
+        setValidating(actualCurrentName, true);
 
         onValidate(values)
             .then(() => {
-                setValidating(false);
-                setError(name);
+                setValidating(actualCurrentName, false);
+                setError(actualCurrentName);
             })
             .catch(errStr => {
-                setValidating(false);
-                setError(name, errStr);
+                setValidating(actualCurrentName, false);
+                setError(actualCurrentName, errStr);
             });
     }, [eventData.uid]);
 
