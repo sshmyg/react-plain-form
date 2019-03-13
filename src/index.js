@@ -17,8 +17,7 @@ import useValidating from './hooks/useValidating';
 /*
     TODO:
     1. Update fields method
-    2. Method for validation all fields or isValid for each field,
-    3. isValidating for each field
+    2. Method for validation all fields or isValid for each field
 */
 
 /**
