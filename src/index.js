@@ -17,7 +17,7 @@ import useValidating from './hooks/useValidating';
 /*
     TODO:
     1. Update fields method
-    2. Method for validation all fields or isValid for each field
+    2. Method for validation all fields
 */
 
 /**
@@ -27,7 +27,7 @@ import useValidating from './hooks/useValidating';
 export function useForm(fieldsConfig) {
     const [fieldsUid, updateFieldsUid] = useUid();
     const [eventData, updateEvent] = useEventUid();
-    const [userFields, updateUserFields] = useState(fieldsConfig);
+    const [userFields, updateFields] = useState(fieldsConfig);
     const [values, setValue] = useValues(fieldsConfig);
     const [activeName, setActiveName] = useState();
     const [errors, setError, setErrors] = useErrors();
@@ -114,6 +114,35 @@ export function useForm(fieldsConfig) {
         setValue(name, value);
         updateEvent('change');
     }, []);
+    const validateAll = useCallback(async values => {
+        let res;
+
+        for (const key of Object.keys(fieldsProps)) {
+            const { onValidate } = fieldsProps[key] || {};
+
+            if (typeof onValidate !== 'function') {
+                continue;
+            }
+
+            setValidating(key, true);
+
+            try {
+                await onValidate(values);
+                setValidating(key, false);
+            } catch (error) {
+                !res && (res = {});
+
+                res[key] = error;
+
+                setValidating(key, false);
+            }
+        }
+
+        if (res) {
+            setErrors(res);
+            return Promise.reject(res);
+        }
+    }, [ fieldsProps ]);
 
     //Update value
     if (activeFieldAttrs) {
@@ -161,22 +190,7 @@ export function useForm(fieldsConfig) {
         errors,
         isValidating,
         setError,
-        setValue: setValueCustom
-        /* handleSubmit: () => {
-            const validations = Object.keys(fieldsProps).map(key =>
-                fieldsProps[key].onValidate(values)
-            );
-
-            setValidating(true);
-
-            Promise.all(validations)
-                .then(() => setValidating(false))
-                .catch(err => {
-                    setValidating(false);
-                    setErrors(err);
-                });
-
-            return values;
-        } */
+        validateAll,
+        setValue: setValueCustom,
     };
 }
