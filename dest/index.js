@@ -1316,8 +1316,8 @@ function useValidating() {
       setValidating = _useState2[1];
 
   var values = Object.values(validatingObj);
-  var isValidating = values.length ? !values.some(function (v) {
-    return !v;
+  var isValidating = values.length ? values.some(function (v) {
+    return Boolean(v);
   }) : false;
   var customSetValidating = Object(react__WEBPACK_IMPORTED_MODULE_3__["useCallback"])(function (name, sate) {
     return setValidating(function (prevState) {
@@ -1522,9 +1522,10 @@ function useForm(fieldsConfig) {
       fieldsProps = _useMemo.fieldsProps;
 
   var _useValidating = Object(_hooks_useValidating__WEBPACK_IMPORTED_MODULE_11__["default"])(),
-      _useValidating2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_4___default()(_useValidating, 2),
+      _useValidating2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_4___default()(_useValidating, 3),
       isValidating = _useValidating2[0],
-      setValidating = _useValidating2[1];
+      setValidating = _useValidating2[1],
+      isValidatingObj = _useValidating2[2];
 
   var activeFieldAttrs = fieldsAttrs[activeName];
   var setValueCustom = Object(react__WEBPACK_IMPORTED_MODULE_5__["useCallback"])(function (name, value) {

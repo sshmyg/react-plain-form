@@ -102,7 +102,7 @@ export function useForm(fieldsConfig) {
             fieldsProps: {}
         });
     }, [fieldsUid]);
-    const [isValidating, setValidating] = useValidating();
+    const [isValidating, setValidating, isValidatingObj] = useValidating();
     const activeFieldAttrs = fieldsAttrs[activeName];
     const setValueCustom = useCallback((name, value) => {
         const { ref } = fieldsProps[name] || {};
