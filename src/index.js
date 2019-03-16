@@ -17,7 +17,6 @@ import useValidating from './hooks/useValidating';
 /*
     TODO:
     1. Update fields method
-    2. Method for validation all fields
 */
 
 /**
@@ -32,7 +31,7 @@ export function useForm(fieldsConfig) {
     const [activeName, setActiveName] = useState();
     const [errors, setError, setErrors] = useErrors();
     const isMount = useRef(false);
-    const prevActiveName = usePrevious(activeName, true);
+    const prevActiveName = usePrevious(activeName);
     const {
         fieldsAttrs,
         fieldsProps
@@ -47,11 +46,10 @@ export function useForm(fieldsConfig) {
                 //Props
                 onValidate,
                 validateOn = 'change',
-                defaultValue = '',
+                defaultValue: value = '',
 
                 ...rest
             } = userFields[name];
-            const value = values[name];
             const inputRef = createRef();
 
             acc.fieldsAttrs[name] = {
@@ -92,7 +90,6 @@ export function useForm(fieldsConfig) {
             acc.fieldsProps[name] = {
                 onValidate,
                 validateOn,
-                defaultValue,
                 ref: inputRef
             };
 
@@ -102,7 +99,7 @@ export function useForm(fieldsConfig) {
             fieldsProps: {}
         });
     }, [fieldsUid]);
-    const [isValidating, setValidating, isValidatingObj] = useValidating();
+    const [isValidating, setValidating] = useValidating();
     const activeFieldAttrs = fieldsAttrs[activeName];
     const setValueCustom = useCallback((name, value) => {
         const { ref } = fieldsProps[name] || {};

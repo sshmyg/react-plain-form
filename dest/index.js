@@ -1423,7 +1423,6 @@ __webpack_require__.r(__webpack_exports__);
 /*
     TODO:
     1. Update fields method
-    2. Method for validation all fields
 */
 
 /**
@@ -1464,7 +1463,7 @@ function useForm(fieldsConfig) {
       setErrors = _useErrors2[2];
 
   var isMount = Object(react__WEBPACK_IMPORTED_MODULE_5__["useRef"])(false);
-  var prevActiveName = Object(_hooks_usePrevious__WEBPACK_IMPORTED_MODULE_6__["default"])(activeName, true);
+  var prevActiveName = Object(_hooks_usePrevious__WEBPACK_IMPORTED_MODULE_6__["default"])(activeName);
 
   var _useMemo = Object(react__WEBPACK_IMPORTED_MODULE_5__["useMemo"])(function () {
     return Object.keys(userFields).reduce(function (acc, name) {
@@ -1477,10 +1476,9 @@ function useForm(fieldsConfig) {
           _userFields$name$vali = _userFields$name.validateOn,
           validateOn = _userFields$name$vali === void 0 ? 'change' : _userFields$name$vali,
           _userFields$name$defa = _userFields$name.defaultValue,
-          defaultValue = _userFields$name$defa === void 0 ? '' : _userFields$name$defa,
+          value = _userFields$name$defa === void 0 ? '' : _userFields$name$defa,
           rest = _babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_3___default()(_userFields$name, ["ref", "onChange", "onFocus", "onBlur", "onValidate", "validateOn", "defaultValue"]);
 
-      var value = values[name];
       var inputRef = Object(react__WEBPACK_IMPORTED_MODULE_5__["createRef"])();
       acc.fieldsAttrs[name] = _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_2___default()({
         name: name,
@@ -1509,7 +1507,6 @@ function useForm(fieldsConfig) {
       acc.fieldsProps[name] = {
         onValidate: onValidate,
         validateOn: validateOn,
-        defaultValue: defaultValue,
         ref: inputRef
       };
       return acc;
@@ -1522,10 +1519,9 @@ function useForm(fieldsConfig) {
       fieldsProps = _useMemo.fieldsProps;
 
   var _useValidating = Object(_hooks_useValidating__WEBPACK_IMPORTED_MODULE_11__["default"])(),
-      _useValidating2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_4___default()(_useValidating, 3),
+      _useValidating2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_4___default()(_useValidating, 2),
       isValidating = _useValidating2[0],
-      setValidating = _useValidating2[1],
-      isValidatingObj = _useValidating2[2];
+      setValidating = _useValidating2[1];
 
   var activeFieldAttrs = fieldsAttrs[activeName];
   var setValueCustom = Object(react__WEBPACK_IMPORTED_MODULE_5__["useCallback"])(function (name, value) {
