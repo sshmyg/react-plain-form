@@ -138,7 +138,7 @@ export function useForm(fieldsConfig) {
         } = fieldsProps[actualCurrentName] || {};
         const isValidation = (new RegExp(type)).test(validateOn);
 
-        if (typeof onValidate !== 'function' || !isValidation || isValidating) {
+        if (typeof onValidate !== 'function' || !isValidation) {
             return;
         }
 

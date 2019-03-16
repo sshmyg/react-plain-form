@@ -540,7 +540,7 @@ function useForm(fieldsConfig) {
 
     var isValidation = new RegExp(type).test(validateOn);
 
-    if (typeof onValidate !== 'function' || !isValidation || isValidating) {
+    if (typeof onValidate !== 'function' || !isValidation) {
       return;
     }
 
