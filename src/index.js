@@ -17,6 +17,8 @@ import useFields from './hooks/useFields';
     1. How to understand valid form on submit or not, if some fields not touched
 */
 
+const checkTypes = ['radio', 'checkbox'];
+
 /**
  * useForm
  * @param {Object} schema
@@ -85,7 +87,11 @@ export function useForm(schema) {
 
     //Update value
     if (activeFieldAttrs) {
-        activeFieldAttrs.value = values[activeName];
+        if (checkTypes.includes(activeFieldAttrs.type)) {
+            activeFieldAttrs.checked = Boolean(values[activeName]);
+        } else {
+            activeFieldAttrs.value = values[activeName];
+        }
     }
 
     useEffect(() => {

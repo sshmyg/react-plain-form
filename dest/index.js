@@ -1284,17 +1284,22 @@ function useFields(fieldsConfig) {
           validateOn = _fields$name$validate === void 0 ? 'change' : _fields$name$validate,
           _fields$name$defaultV = _fields$name.defaultValue,
           defaultValue = _fields$name$defaultV === void 0 ? '' : _fields$name$defaultV,
-          rest = _babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_2___default()(_fields$name, ["ref", "onChange", "onFocus", "onBlur", "onValidate", "validateOn", "defaultValue"]);
+          _fields$name$defaultC = _fields$name.defaultChecked,
+          defaultChecked = _fields$name$defaultC === void 0 ? false : _fields$name$defaultC,
+          rest = _babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_2___default()(_fields$name, ["ref", "onChange", "onFocus", "onBlur", "onValidate", "validateOn", "defaultValue", "defaultChecked"]);
 
       var inputRef = Object(react__WEBPACK_IMPORTED_MODULE_4__["createRef"])(); //Filter default values, add to defaults only non existing in values fields
 
       if (!values[name]) {
-        defaultValues[name] = rest.type !== 'checkbox' ? defaultValue : rest.defaultChecked || false;
+        defaultValues[name] = rest.type !== 'checkbox' ? defaultValue : defaultChecked;
       }
 
       acc.fieldsAttrs[name] = _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_1___default()({
-        name: name,
+        name: name
+      }, rest.type !== 'checkbox' ? {
         value: values[name] || defaultValue
+      } : {
+        checked: values[name] || defaultChecked
       }, rest, {
         ref: function ref(el) {
           inputRef.current = el;
@@ -1502,6 +1507,7 @@ __webpack_require__.r(__webpack_exports__);
     1. How to understand valid form on submit or not, if some fields not touched
 */
 
+var checkTypes = ['radio', 'checkbox'];
 /**
  * useForm
  * @param {Object} schema
@@ -1637,7 +1643,11 @@ function useForm(schema) {
   var activeFieldAttrs = fieldsAttrs[activeName]; //Update value
 
   if (activeFieldAttrs) {
-    activeFieldAttrs.value = values[activeName];
+    if (checkTypes.includes(activeFieldAttrs.type)) {
+      activeFieldAttrs.checked = Boolean(values[activeName]);
+    } else {
+      activeFieldAttrs.value = values[activeName];
+    }
   }
 
   Object(react__WEBPACK_IMPORTED_MODULE_3__["useEffect"])(function () {

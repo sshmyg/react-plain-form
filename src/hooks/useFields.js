@@ -27,6 +27,7 @@ export default function useFields(fieldsConfig, options = {}) {
                 onValidate,
                 validateOn = 'change',
                 defaultValue = '',
+                defaultChecked = false,
 
                 ...rest
             } = fields[name];
@@ -34,12 +35,18 @@ export default function useFields(fieldsConfig, options = {}) {
 
             //Filter default values, add to defaults only non existing in values fields
             if (!values[name]) {
-                defaultValues[name] = rest.type !== 'checkbox' ? defaultValue : rest.defaultChecked || false;
+                defaultValues[name] = rest.type !== 'checkbox'
+                    ? defaultValue
+                    : defaultChecked;
             }
 
             acc.fieldsAttrs[name] = {
                 name,
-                value: values[name] || defaultValue,
+                ...(
+                    rest.type !== 'checkbox'
+                        ? { value: values[name] || defaultValue }
+                        : { checked: values[name] || defaultChecked }
+                ),
                 ...rest,
 
                 ref: el => {
