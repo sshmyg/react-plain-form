@@ -1233,6 +1233,108 @@ function useEventUid() {
 
 /***/ }),
 
+/***/ "./src/hooks/useFields.js":
+/*!********************************!*\
+  !*** ./src/hooks/useFields.js ***!
+  \********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return useFields; });
+/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "./node_modules/@babel/runtime/helpers/defineProperty.js");
+/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/objectSpread */ "./node_modules/@babel/runtime/helpers/objectSpread.js");
+/* harmony import */ var _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @babel/runtime/helpers/objectWithoutProperties */ "./node_modules/@babel/runtime/helpers/objectWithoutProperties.js");
+/* harmony import */ var _babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/slicedToArray.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_4__);
+
+
+
+
+
+function useFields(fieldsConfig) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  var updateEvent = options.updateEvent,
+      setValues = options.setValues,
+      setActiveName = options.setActiveName,
+      values = options.values;
+
+  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_4__["useState"])(fieldsConfig),
+      _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_3___default()(_useState, 2),
+      fields = _useState2[0],
+      updateFields = _useState2[1];
+
+  return Object(react__WEBPACK_IMPORTED_MODULE_4__["useMemo"])(function () {
+    var defaultValues = {};
+    var res = Object.keys(fields).reduce(function (acc, name) {
+      var _fields$name = fields[name],
+          _ref = _fields$name.ref,
+          _onChange = _fields$name.onChange,
+          _onFocus = _fields$name.onFocus,
+          _onBlur = _fields$name.onBlur,
+          onValidate = _fields$name.onValidate,
+          _fields$name$validate = _fields$name.validateOn,
+          validateOn = _fields$name$validate === void 0 ? 'change' : _fields$name$validate,
+          _fields$name$defaultV = _fields$name.defaultValue,
+          defaultValue = _fields$name$defaultV === void 0 ? '' : _fields$name$defaultV,
+          rest = _babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_2___default()(_fields$name, ["ref", "onChange", "onFocus", "onBlur", "onValidate", "validateOn", "defaultValue"]);
+
+      var inputRef = Object(react__WEBPACK_IMPORTED_MODULE_4__["createRef"])(); //Filter default values, add to defaults only non existing in values fields
+
+      if (!values[name]) {
+        defaultValues[name] = defaultValue;
+      }
+
+      acc.fieldsAttrs[name] = _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_1___default()({
+        name: name,
+        value: values[name] || defaultValue
+      }, rest, {
+        ref: function ref(el) {
+          inputRef.current = el;
+          _ref && _ref.current && (_ref.current = el);
+        },
+        onChange: function onChange(e) {
+          //setValue(name, e.target.value);
+          setValues(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default()({}, name, e.target.value));
+          updateEvent('change');
+          typeof _onChange === 'function' && _onChange(e);
+        },
+        onFocus: function onFocus(e) {
+          setActiveName(name);
+          updateEvent('focus');
+          typeof _onFocus === 'function' && _onFocus(e);
+        },
+        onBlur: function onBlur(e) {
+          setActiveName();
+          updateEvent('blur');
+          typeof _onBlur === 'function' && _onBlur(e);
+        }
+      });
+      acc.fieldsProps[name] = {
+        onValidate: onValidate,
+        validateOn: validateOn,
+        ref: inputRef
+      };
+      return acc;
+    }, {
+      fieldsAttrs: {},
+      fieldsProps: {},
+      updateFields: updateFields
+    }); //Set default values
+
+    Object.keys(defaultValues).length && setValues(defaultValues);
+    return res;
+  }, [fields]);
+}
+
+/***/ }),
+
 /***/ "./src/hooks/usePrevious.js":
 /*!**********************************!*\
   !*** ./src/hooks/usePrevious.js ***!
@@ -1252,35 +1354,6 @@ function usePrevious(value) {
     ref.current = value;
   });
   return ref.current;
-}
-
-/***/ }),
-
-/***/ "./src/hooks/useUid.js":
-/*!*****************************!*\
-  !*** ./src/hooks/useUid.js ***!
-  \*****************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return useUid; });
-/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/slicedToArray.js");
-/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "react");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
-
-
-function useUid() {
-  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_1__["useState"])(Date.now()),
-      _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState, 2),
-      uid = _useState2[0],
-      updateUid = _useState2[1];
-
-  return [uid, function () {
-    return updateUid(Date.now());
-  }];
 }
 
 /***/ }),
@@ -1341,41 +1414,46 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return useValues; });
 /* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "./node_modules/@babel/runtime/helpers/defineProperty.js");
 /* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/objectSpread */ "./node_modules/@babel/runtime/helpers/objectSpread.js");
-/* harmony import */ var _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/slicedToArray.js");
-/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/slicedToArray.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @babel/runtime/helpers/objectSpread */ "./node_modules/@babel/runtime/helpers/objectSpread.js");
+/* harmony import */ var _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react */ "react");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_3__);
 
 
 
 
-function useValues(fieldsConfig) {
-  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_3__["useState"])(function () {
-    return Object.keys(fieldsConfig).reduce(function (acc, name) {
-      var _fieldsConfig$name$de = fieldsConfig[name].defaultValue,
-          defaultValue = _fieldsConfig$name$de === void 0 ? '' : _fieldsConfig$name$de;
-      acc[name] = defaultValue;
-      return acc;
-    }, {});
-  }),
-      _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_2___default()(_useState, 2),
-      values = _useState2[0],
-      setValues = _useState2[1];
 
-  var setValuesCustom = function setValuesCustom() {
-    var newValues = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    return setValues(function (prevValues) {
-      return _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_1___default()({}, prevValues, newValues);
+function reducer(state, _ref) {
+  var type = _ref.type,
+      _ref$payload = _ref.payload,
+      payload = _ref$payload === void 0 ? {} : _ref$payload;
+
+  switch (type) {
+    case 'extend':
+      return _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_2___default()({}, state, payload);
+  }
+}
+
+function useValues() {
+  var _useReducer = Object(react__WEBPACK_IMPORTED_MODULE_3__["useReducer"])(reducer, {}),
+      _useReducer2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_1___default()(_useReducer, 2),
+      values = _useReducer2[0],
+      dispatch = _useReducer2[1];
+
+  var setValues = function setValues(values) {
+    return dispatch({
+      type: 'extend',
+      payload: values
     });
   };
 
   var setValue = function setValue(name, value) {
-    return setValuesCustom(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default()({}, name, value));
+    return setValues(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default()({}, name, value));
   };
 
-  return [values, setValue];
+  return [values, setValue, setValues];
 }
 
 /***/ }),
@@ -1394,22 +1472,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js");
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @babel/runtime/helpers/objectSpread */ "./node_modules/@babel/runtime/helpers/objectSpread.js");
-/* harmony import */ var _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @babel/runtime/helpers/objectWithoutProperties */ "./node_modules/@babel/runtime/helpers/objectWithoutProperties.js");
-/* harmony import */ var _babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/slicedToArray.js");
-/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react */ "react");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var _hooks_usePrevious__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./hooks/usePrevious */ "./src/hooks/usePrevious.js");
-/* harmony import */ var _hooks_useErrors__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./hooks/useErrors */ "./src/hooks/useErrors.js");
-/* harmony import */ var _hooks_useValues__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./hooks/useValues */ "./src/hooks/useValues.js");
-/* harmony import */ var _hooks_useUid__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./hooks/useUid */ "./src/hooks/useUid.js");
-/* harmony import */ var _hooks_useEventUid__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./hooks/useEventUid */ "./src/hooks/useEventUid.js");
-/* harmony import */ var _hooks_useValidating__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./hooks/useValidating */ "./src/hooks/useValidating.js");
-
-
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/slicedToArray.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _hooks_usePrevious__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./hooks/usePrevious */ "./src/hooks/usePrevious.js");
+/* harmony import */ var _hooks_useErrors__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./hooks/useErrors */ "./src/hooks/useErrors.js");
+/* harmony import */ var _hooks_useValues__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./hooks/useValues */ "./src/hooks/useValues.js");
+/* harmony import */ var _hooks_useEventUid__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./hooks/useEventUid */ "./src/hooks/useEventUid.js");
+/* harmony import */ var _hooks_useValidating__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./hooks/useValidating */ "./src/hooks/useValidating.js");
+/* harmony import */ var _hooks_useFields__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./hooks/useFields */ "./src/hooks/useFields.js");
 
 
 
@@ -1422,7 +1494,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /*
     TODO:
-    1. Update fields method
+    1. How to understand valid form on submit or not, if some fields not touched
 */
 
 /**
@@ -1431,114 +1503,62 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 function useForm(fieldsConfig) {
-  var _useUid = Object(_hooks_useUid__WEBPACK_IMPORTED_MODULE_9__["default"])(),
-      _useUid2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_4___default()(_useUid, 2),
-      fieldsUid = _useUid2[0],
-      updateFieldsUid = _useUid2[1];
-
-  var _useEventUid = Object(_hooks_useEventUid__WEBPACK_IMPORTED_MODULE_10__["default"])(),
-      _useEventUid2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_4___default()(_useEventUid, 2),
+  var _useEventUid = Object(_hooks_useEventUid__WEBPACK_IMPORTED_MODULE_7__["default"])(),
+      _useEventUid2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_2___default()(_useEventUid, 2),
       eventData = _useEventUid2[0],
       updateEvent = _useEventUid2[1];
 
-  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_5__["useState"])(fieldsConfig),
-      _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_4___default()(_useState, 2),
-      userFields = _useState2[0],
-      updateFields = _useState2[1];
-
-  var _useValues = Object(_hooks_useValues__WEBPACK_IMPORTED_MODULE_8__["default"])(fieldsConfig),
-      _useValues2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_4___default()(_useValues, 2),
+  var _useValues = Object(_hooks_useValues__WEBPACK_IMPORTED_MODULE_6__["default"])(),
+      _useValues2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_2___default()(_useValues, 3),
       values = _useValues2[0],
-      setValue = _useValues2[1];
+      setValue = _useValues2[1],
+      setValues = _useValues2[2];
 
-  var _useState3 = Object(react__WEBPACK_IMPORTED_MODULE_5__["useState"])(),
-      _useState4 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_4___default()(_useState3, 2),
-      activeName = _useState4[0],
-      setActiveName = _useState4[1];
+  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_3__["useState"])(),
+      _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_2___default()(_useState, 2),
+      activeName = _useState2[0],
+      setActiveName = _useState2[1];
 
-  var _useErrors = Object(_hooks_useErrors__WEBPACK_IMPORTED_MODULE_7__["default"])(),
-      _useErrors2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_4___default()(_useErrors, 3),
+  var _useErrors = Object(_hooks_useErrors__WEBPACK_IMPORTED_MODULE_5__["default"])(),
+      _useErrors2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_2___default()(_useErrors, 3),
       errors = _useErrors2[0],
       setError = _useErrors2[1],
       setErrors = _useErrors2[2];
 
-  var isMount = Object(react__WEBPACK_IMPORTED_MODULE_5__["useRef"])(false);
-  var prevActiveName = Object(_hooks_usePrevious__WEBPACK_IMPORTED_MODULE_6__["default"])(activeName);
+  var isMount = Object(react__WEBPACK_IMPORTED_MODULE_3__["useRef"])(false);
+  var prevActiveName = Object(_hooks_usePrevious__WEBPACK_IMPORTED_MODULE_4__["default"])(activeName);
 
-  var _useMemo = Object(react__WEBPACK_IMPORTED_MODULE_5__["useMemo"])(function () {
-    return Object.keys(userFields).reduce(function (acc, name) {
-      var _userFields$name = userFields[name],
-          _ref = _userFields$name.ref,
-          _onChange = _userFields$name.onChange,
-          _onFocus = _userFields$name.onFocus,
-          _onBlur = _userFields$name.onBlur,
-          onValidate = _userFields$name.onValidate,
-          _userFields$name$vali = _userFields$name.validateOn,
-          validateOn = _userFields$name$vali === void 0 ? 'change' : _userFields$name$vali,
-          _userFields$name$defa = _userFields$name.defaultValue,
-          value = _userFields$name$defa === void 0 ? '' : _userFields$name$defa,
-          rest = _babel_runtime_helpers_objectWithoutProperties__WEBPACK_IMPORTED_MODULE_3___default()(_userFields$name, ["ref", "onChange", "onFocus", "onBlur", "onValidate", "validateOn", "defaultValue"]);
+  var _useFields = Object(_hooks_useFields__WEBPACK_IMPORTED_MODULE_9__["default"])(fieldsConfig, {
+    updateEvent: updateEvent,
+    setActiveName: setActiveName,
+    setValues: setValues,
+    values: values
+  }),
+      fieldsAttrs = _useFields.fieldsAttrs,
+      fieldsProps = _useFields.fieldsProps,
+      updateFields = _useFields.updateFields;
 
-      var inputRef = Object(react__WEBPACK_IMPORTED_MODULE_5__["createRef"])();
-      acc.fieldsAttrs[name] = _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_2___default()({
-        name: name,
-        value: value
-      }, rest, {
-        ref: function ref(el) {
-          inputRef.current = el;
-          _ref && _ref.current && (_ref.current = el);
-        },
-        onChange: function onChange(e) {
-          setValue(name, e.target.value);
-          updateEvent('change');
-          typeof _onChange === 'function' && _onChange(e);
-        },
-        onFocus: function onFocus(e) {
-          setActiveName(name);
-          updateEvent('focus');
-          typeof _onFocus === 'function' && _onFocus(e);
-        },
-        onBlur: function onBlur(e) {
-          setActiveName();
-          updateEvent('blur');
-          typeof _onBlur === 'function' && _onBlur(e);
-        }
-      });
-      acc.fieldsProps[name] = {
-        onValidate: onValidate,
-        validateOn: validateOn,
-        ref: inputRef
-      };
-      return acc;
-    }, {
-      fieldsAttrs: {},
-      fieldsProps: {}
-    });
-  }, [fieldsUid]),
-      fieldsAttrs = _useMemo.fieldsAttrs,
-      fieldsProps = _useMemo.fieldsProps;
-
-  var _useValidating = Object(_hooks_useValidating__WEBPACK_IMPORTED_MODULE_11__["default"])(),
-      _useValidating2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_4___default()(_useValidating, 2),
+  var _useValidating = Object(_hooks_useValidating__WEBPACK_IMPORTED_MODULE_8__["default"])(),
+      _useValidating2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_2___default()(_useValidating, 2),
       isValidating = _useValidating2[0],
       setValidating = _useValidating2[1];
 
   var activeFieldAttrs = fieldsAttrs[activeName];
-  var setValueCustom = Object(react__WEBPACK_IMPORTED_MODULE_5__["useCallback"])(function (name, value) {
-    var _ref2 = fieldsProps[name] || {},
-        ref = _ref2.ref;
+  var setValueCustom = Object(react__WEBPACK_IMPORTED_MODULE_3__["useCallback"])(function (name, value) {
+    var _ref = fieldsProps[name] || {},
+        ref = _ref.ref;
 
     ref && ref.current && ref.current.focus();
     setValue(name, value);
     updateEvent('change');
-  }, []);
-  var validateAll = Object(react__WEBPACK_IMPORTED_MODULE_5__["useCallback"])(
+  }, [fieldsProps]);
+  var validateAll = Object(react__WEBPACK_IMPORTED_MODULE_3__["useCallback"])(
   /*#__PURE__*/
   function () {
-    var _ref3 = _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1___default()(
+    var _ref2 = _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1___default()(
     /*#__PURE__*/
     _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(values) {
-      var res, _arr, _i, key, _ref4, onValidate;
+      var errors, _arr, _i, name, _ref3, onValidate;
 
       return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
         while (1) {
@@ -1553,8 +1573,8 @@ function useForm(fieldsConfig) {
                 break;
               }
 
-              key = _arr[_i];
-              _ref4 = fieldsProps[key] || {}, onValidate = _ref4.onValidate;
+              name = _arr[_i];
+              _ref3 = fieldsProps[name] || {}, onValidate = _ref3.onValidate;
 
               if (!(typeof onValidate !== 'function')) {
                 _context.next = 7;
@@ -1564,22 +1584,22 @@ function useForm(fieldsConfig) {
               return _context.abrupt("continue", 19);
 
             case 7:
-              setValidating(key, true);
+              setValidating(name, true);
               _context.prev = 8;
               _context.next = 11;
               return onValidate(values);
 
             case 11:
-              setValidating(key, false);
+              setValidating(name, false);
               _context.next = 19;
               break;
 
             case 14:
               _context.prev = 14;
               _context.t0 = _context["catch"](8);
-              !res && (res = {});
-              res[key] = _context.t0;
-              setValidating(key, false);
+              !errors && (errors = {});
+              errors[name] = _context.t0;
+              setValidating(name, false);
 
             case 19:
               _i++;
@@ -1587,13 +1607,13 @@ function useForm(fieldsConfig) {
               break;
 
             case 22:
-              if (!res) {
+              if (!errors) {
                 _context.next = 25;
                 break;
               }
 
-              setErrors(res);
-              return _context.abrupt("return", Promise.reject(res));
+              setErrors(errors);
+              return _context.abrupt("return", Promise.reject(errors));
 
             case 25:
             case "end":
@@ -1604,7 +1624,7 @@ function useForm(fieldsConfig) {
     }));
 
     return function (_x) {
-      return _ref3.apply(this, arguments);
+      return _ref2.apply(this, arguments);
     };
   }(), [fieldsProps]); //Update value
 
@@ -1612,7 +1632,7 @@ function useForm(fieldsConfig) {
     activeFieldAttrs.value = values[activeName];
   }
 
-  Object(react__WEBPACK_IMPORTED_MODULE_5__["useEffect"])(function () {
+  Object(react__WEBPACK_IMPORTED_MODULE_3__["useEffect"])(function () {
     //Skip validation on field mount
     if (!isMount.current) {
       isMount.current = true;
@@ -1623,9 +1643,9 @@ function useForm(fieldsConfig) {
 
     var actualCurrentName = type === 'blur' ? prevActiveName : activeName;
 
-    var _ref5 = fieldsProps[actualCurrentName] || {},
-        onValidate = _ref5.onValidate,
-        validateOn = _ref5.validateOn;
+    var _ref4 = fieldsProps[actualCurrentName] || {},
+        onValidate = _ref4.onValidate,
+        validateOn = _ref4.validateOn;
 
     var isValidation = new RegExp(type).test(validateOn);
 
@@ -1643,12 +1663,13 @@ function useForm(fieldsConfig) {
     });
   }, [eventData.uid]);
   return {
-    values: values,
-    fields: fieldsAttrs,
-    errors: errors,
     isValidating: isValidating,
+    fields: fieldsAttrs,
+    values: values,
+    errors: errors,
     setError: setError,
     validateAll: validateAll,
+    updateFields: updateFields,
     setValue: setValueCustom
   };
 }

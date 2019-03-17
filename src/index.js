@@ -2,21 +2,19 @@ import {
     useState,
     useEffect,
     useRef,
-    useMemo,
-    createRef,
     useCallback
 } from 'react';
 
 import usePrevious from './hooks/usePrevious';
 import useErrors from './hooks/useErrors';
 import useValues from './hooks/useValues';
-import useUid from './hooks/useUid';
 import useEventUid from './hooks/useEventUid';
 import useValidating from './hooks/useValidating';
+import useFields from './hooks/useFields';
 
 /*
     TODO:
-    1. Update fields method
+    1. How to understand valid form on submit or not, if some fields not touched
 */
 
 /**
@@ -24,81 +22,22 @@ import useValidating from './hooks/useValidating';
  * @param {Object} fieldsConfig
  */
 export function useForm(fieldsConfig) {
-    const [fieldsUid, updateFieldsUid] = useUid();
     const [eventData, updateEvent] = useEventUid();
-    const [userFields, updateFields] = useState(fieldsConfig);
-    const [values, setValue] = useValues(fieldsConfig);
+    const [values, setValue, setValues] = useValues();
     const [activeName, setActiveName] = useState();
     const [errors, setError, setErrors] = useErrors();
     const isMount = useRef(false);
     const prevActiveName = usePrevious(activeName);
     const {
         fieldsAttrs,
-        fieldsProps
-    } = useMemo(() => {
-        return Object.keys(userFields).reduce((acc, name) => {
-            const {
-                //Attrs
-                ref,
-                onChange,
-                onFocus,
-                onBlur,
-                //Props
-                onValidate,
-                validateOn = 'change',
-                defaultValue: value = '',
-
-                ...rest
-            } = userFields[name];
-            const inputRef = createRef();
-
-            acc.fieldsAttrs[name] = {
-                name,
-                value,
-                ...rest,
-
-                ref: el => {
-                    inputRef.current = el;
-                    ref && ref.current && (ref.current = el);
-                },
-
-                onChange: e => {
-                    setValue(name, e.target.value);
-
-                    updateEvent('change');
-
-                    typeof onChange === 'function' && onChange(e);
-                },
-
-                onFocus: e => {
-                    setActiveName(name);
-
-                    updateEvent('focus');
-
-                    typeof onFocus === 'function' && onFocus(e);
-                },
-
-                onBlur: e => {
-                    setActiveName();
-
-                    updateEvent('blur');
-
-                    typeof onBlur === 'function' && onBlur(e);
-                }
-            };
-
-            acc.fieldsProps[name] = {
-                onValidate,
-                validateOn,
-                ref: inputRef
-            };
-
-            return acc;
-        }, {
-            fieldsAttrs: {},
-            fieldsProps: {}
-        });
-    }, [fieldsUid]);
+        fieldsProps,
+        updateFields
+    } = useFields(fieldsConfig, {
+        updateEvent,
+        setActiveName,
+        setValues,
+        values
+    });
     const [isValidating, setValidating] = useValidating();
     const activeFieldAttrs = fieldsAttrs[activeName];
     const setValueCustom = useCallback((name, value) => {
@@ -110,34 +49,34 @@ export function useForm(fieldsConfig) {
 
         setValue(name, value);
         updateEvent('change');
-    }, []);
+    }, [fieldsProps]);
     const validateAll = useCallback(async values => {
-        let res;
+        let errors;
 
-        for (const key of Object.keys(fieldsProps)) {
-            const { onValidate } = fieldsProps[key] || {};
+        for (const name of Object.keys(fieldsProps)) {
+            const { onValidate } = fieldsProps[name] || {};
 
             if (typeof onValidate !== 'function') {
                 continue;
             }
 
-            setValidating(key, true);
+            setValidating(name, true);
 
             try {
                 await onValidate(values);
-                setValidating(key, false);
+                setValidating(name, false);
             } catch (error) {
-                !res && (res = {});
+                !errors && (errors = {});
 
-                res[key] = error;
+                errors[name] = error;
 
-                setValidating(key, false);
+                setValidating(name, false);
             }
         }
 
-        if (res) {
-            setErrors(res);
-            return Promise.reject(res);
+        if (errors) {
+            setErrors(errors);
+            return Promise.reject(errors);
         }
     }, [ fieldsProps ]);
 
@@ -182,12 +121,13 @@ export function useForm(fieldsConfig) {
     }, [eventData.uid]);
 
     return {
-        values,
-        fields: fieldsAttrs,
-        errors,
         isValidating,
+        fields: fieldsAttrs,
+        values,
+        errors,
         setError,
         validateAll,
+        updateFields,
         setValue: setValueCustom,
     };
 }

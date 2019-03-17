@@ -1,23 +1,26 @@
-import { useState } from 'react';
+import { useReducer } from 'react';
 
-export default function useValues(fieldsConfig) {
-    const [values, setValues] = useState(() => {
-        return Object.keys(fieldsConfig).reduce((acc, name) => {
-            const { defaultValue = '' } = fieldsConfig[name];
+function reducer(state, { type, payload = {} }) {
+    switch (type) {
+        case 'extend':
+            return {
+                ...state,
+                ...payload
+            };
+    }
+}
 
-            acc[name] = defaultValue;
-
-            return acc;
-        }, {});
+export default function useValues() {
+    const [values, dispatch] = useReducer(reducer, {});
+    const setValues = values => dispatch({
+        type: 'extend',
+        payload: values
     });
-    const setValuesCustom = (newValues = {}) => setValues(prevValues => ({
-        ...prevValues,
-        ...newValues
-    }));
-    const setValue = (name, value) => setValuesCustom({ [name]: value });
+    const setValue = (name, value) => setValues({ [name]: value });
 
     return [
         values,
-        setValue
+        setValue,
+        setValues
     ];
 }
