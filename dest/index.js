@@ -1223,12 +1223,13 @@ function useEventUid() {
       eventData = _useState2[0],
       set = _useState2[1];
 
-  return [eventData, function (type) {
-    set({
+  var updateEvent = Object(react__WEBPACK_IMPORTED_MODULE_1__["useCallback"])(function (type) {
+    return set({
       type: type,
       uid: Date.now()
     });
-  }];
+  });
+  return [eventData, updateEvent];
 }
 
 /***/ }),
@@ -1288,7 +1289,7 @@ function useFields(fieldsConfig) {
       var inputRef = Object(react__WEBPACK_IMPORTED_MODULE_4__["createRef"])(); //Filter default values, add to defaults only non existing in values fields
 
       if (!values[name]) {
-        defaultValues[name] = defaultValue;
+        defaultValues[name] = rest.type !== 'checkbox' ? defaultValue : rest.defaultChecked || false;
       }
 
       acc.fieldsAttrs[name] = _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_1___default()({
@@ -1300,8 +1301,12 @@ function useFields(fieldsConfig) {
           _ref && _ref.current && (_ref.current = el);
         },
         onChange: function onChange(e) {
-          //setValue(name, e.target.value);
-          setValues(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default()({}, name, e.target.value));
+          var _e$target = e.target,
+              type = _e$target.type,
+              value = _e$target.value,
+              checked = _e$target.checked;
+          var actualizedValue = type === 'checkbox' ? checked : value;
+          setValues(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default()({}, name, actualizedValue));
           updateEvent('change');
           typeof _onChange === 'function' && _onChange(e);
         },
@@ -1499,10 +1504,13 @@ __webpack_require__.r(__webpack_exports__);
 
 /**
  * useForm
- * @param {Object} fieldsConfig
+ * @param {Object} schema
+ * @param {Any} schema.<any> - could contains any valid html5 attr
+ * @param {Function} [schema.onValidate] - validation function. Get `values` as argument and should return Promise
+ * @param {String|Array} [schema.validateOn]="change" - events for validation, could be `change|focus|blur`
  */
 
-function useForm(fieldsConfig) {
+function useForm(schema) {
   var _useEventUid = Object(_hooks_useEventUid__WEBPACK_IMPORTED_MODULE_7__["default"])(),
       _useEventUid2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_2___default()(_useEventUid, 2),
       eventData = _useEventUid2[0],
@@ -1528,7 +1536,7 @@ function useForm(fieldsConfig) {
   var isMount = Object(react__WEBPACK_IMPORTED_MODULE_3__["useRef"])(false);
   var prevActiveName = Object(_hooks_usePrevious__WEBPACK_IMPORTED_MODULE_4__["default"])(activeName);
 
-  var _useFields = Object(_hooks_useFields__WEBPACK_IMPORTED_MODULE_9__["default"])(fieldsConfig, {
+  var _useFields = Object(_hooks_useFields__WEBPACK_IMPORTED_MODULE_9__["default"])(schema, {
     updateEvent: updateEvent,
     setActiveName: setActiveName,
     setValues: setValues,
@@ -1543,7 +1551,6 @@ function useForm(fieldsConfig) {
       isValidating = _useValidating2[0],
       setValidating = _useValidating2[1];
 
-  var activeFieldAttrs = fieldsAttrs[activeName];
   var setValueCustom = Object(react__WEBPACK_IMPORTED_MODULE_3__["useCallback"])(function (name, value) {
     var _ref = fieldsProps[name] || {},
         ref = _ref.ref;
@@ -1626,7 +1633,8 @@ function useForm(fieldsConfig) {
     return function (_x) {
       return _ref2.apply(this, arguments);
     };
-  }(), [fieldsProps]); //Update value
+  }(), [fieldsProps]);
+  var activeFieldAttrs = fieldsAttrs[activeName]; //Update value
 
   if (activeFieldAttrs) {
     activeFieldAttrs.value = values[activeName];

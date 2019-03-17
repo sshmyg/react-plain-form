@@ -34,7 +34,7 @@ export default function useFields(fieldsConfig, options = {}) {
 
             //Filter default values, add to defaults only non existing in values fields
             if (!values[name]) {
-                defaultValues[name] = defaultValue;
+                defaultValues[name] = rest.type !== 'checkbox' ? defaultValue : rest.defaultChecked || false;
             }
 
             acc.fieldsAttrs[name] = {
@@ -48,8 +48,14 @@ export default function useFields(fieldsConfig, options = {}) {
                 },
 
                 onChange: e => {
-                    //setValue(name, e.target.value);
-                    setValues({ [name]: e.target.value });
+                    const {
+                        type,
+                        value,
+                        checked
+                    } = e.target;
+                    const actualizedValue = type === 'checkbox' ? checked : value;
+
+                    setValues({ [name]: actualizedValue });
 
                     updateEvent('change');
 

@@ -19,9 +19,12 @@ import useFields from './hooks/useFields';
 
 /**
  * useForm
- * @param {Object} fieldsConfig
+ * @param {Object} schema
+ * @param {Any} schema.<any> - could contains any valid html5 attr
+ * @param {Function} [schema.onValidate] - validation function. Get `values` as argument and should return Promise
+ * @param {String|Array} [schema.validateOn]="change" - events for validation, could be `change|focus|blur`
  */
-export function useForm(fieldsConfig) {
+export function useForm(schema) {
     const [eventData, updateEvent] = useEventUid();
     const [values, setValue, setValues] = useValues();
     const [activeName, setActiveName] = useState();
@@ -32,14 +35,13 @@ export function useForm(fieldsConfig) {
         fieldsAttrs,
         fieldsProps,
         updateFields
-    } = useFields(fieldsConfig, {
+    } = useFields(schema, {
         updateEvent,
         setActiveName,
         setValues,
         values
     });
     const [isValidating, setValidating] = useValidating();
-    const activeFieldAttrs = fieldsAttrs[activeName];
     const setValueCustom = useCallback((name, value) => {
         const { ref } = fieldsProps[name] || {};
 
@@ -79,6 +81,7 @@ export function useForm(fieldsConfig) {
             return Promise.reject(errors);
         }
     }, [ fieldsProps ]);
+    const activeFieldAttrs = fieldsAttrs[activeName];
 
     //Update value
     if (activeFieldAttrs) {
