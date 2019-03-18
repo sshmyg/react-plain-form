@@ -1571,7 +1571,7 @@ function useForm(schema) {
     var _ref2 = _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1___default()(
     /*#__PURE__*/
     _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(values) {
-      var errors, _arr, _i, name, _ref3, onValidate;
+      var errors, _arr, _i, name, _ref3, onValidate, err;
 
       return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
         while (1) {
@@ -1611,7 +1611,7 @@ function useForm(schema) {
               _context.prev = 14;
               _context.t0 = _context["catch"](8);
               !errors && (errors = {});
-              errors[name] = _context.t0;
+              errors[name] = _context.t0.message;
               setValidating(name, false);
 
             case 19:
@@ -1621,14 +1621,19 @@ function useForm(schema) {
 
             case 22:
               if (!errors) {
-                _context.next = 25;
+                _context.next = 27;
                 break;
               }
 
               setErrors(errors);
-              return _context.abrupt("return", Promise.reject(errors));
+              err = new Error('Errors occured, see `errors` param for details');
+              err.errors = errors;
+              return _context.abrupt("return", Promise.reject(err));
 
-            case 25:
+            case 27:
+              return _context.abrupt("return", Promise.resolve(values));
+
+            case 28:
             case "end":
               return _context.stop();
           }
@@ -1675,9 +1680,14 @@ function useForm(schema) {
     onValidate(values).then(function () {
       setValidating(actualCurrentName, false);
       setError(actualCurrentName);
-    }).catch(function (errStr) {
+    }).catch(function (err) {
+      if (!(err instanceof Error)) {
+        console.error('err should be instance of `Error`');
+        return;
+      }
+
       setValidating(actualCurrentName, false);
-      setError(actualCurrentName, errStr);
+      setError(actualCurrentName, err.message);
     });
   }, [eventData.uid]);
   return {

@@ -69,10 +69,10 @@ export function useForm(schema) {
             try {
                 await onValidate(values);
                 setValidating(name, false);
-            } catch (error) {
+            } catch (err) {
                 !errors && (errors = {});
 
-                errors[name] = error;
+                errors[name] = err.message;
 
                 setValidating(name, false);
             }
@@ -80,8 +80,14 @@ export function useForm(schema) {
 
         if (errors) {
             setErrors(errors);
-            return Promise.reject(errors);
+
+            const err = new Error('Errors occured, see `errors` param for details');
+            err.errors = errors;
+
+            return Promise.reject(err);
         }
+
+        return Promise.resolve(values);
     }, [ fieldsProps ]);
     const activeFieldAttrs = fieldsAttrs[activeName];
 
@@ -123,9 +129,14 @@ export function useForm(schema) {
                 setValidating(actualCurrentName, false);
                 setError(actualCurrentName);
             })
-            .catch(errStr => {
+            .catch(err => {
+                if (!(err instanceof Error)) {
+                    console.error('err should be instance of `Error`');
+                    return;
+                }
+
                 setValidating(actualCurrentName, false);
-                setError(actualCurrentName, errStr);
+                setError(actualCurrentName, err.message);
             });
     }, [eventData.uid]);
 
