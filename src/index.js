@@ -28,7 +28,7 @@ const checkTypes = ['radio', 'checkbox'];
  * @param {Function} [schema.onValidate] - validation function. Get `values` as argument and should return Promise
  * @param {String|Array} [schema.validateOn]="change" - events for validation, could be `change|focus|blur`
  */
-export function useForm(schema) {
+export default function useForm(schema) {
     const [eventData, updateEvent] = useEventUid();
     const [values, setValue, setValues] = useValues();
     const [activeName, setActiveName] = useState();
