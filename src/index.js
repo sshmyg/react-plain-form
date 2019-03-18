@@ -148,6 +148,6 @@ export function useForm(schema) {
         setError,
         validateAll,
         updateFields,
-        setValue: setValueCustom,
+        setValue: setValueCustom
     };
 }
