@@ -2,14 +2,17 @@
     "name": "react-plain-form",
     "version": "2.0.0",
     "description": "React simple form for everyday usage 😜",
-    "main": "./dest/index.js",
+    "main": "dest/react-plain-form.js",
+    "umd:main": "dest/react-plain-form.umd.js",
+    "module": "dest/react-plain-form.m.js",
+    "source": "src/index.js",
     "scripts": {
-        "clear": "rm -rf dist node_modules",
-        "start": "NODE_ENV=development npx webpack --watch --progress --hide-modules",
+        "start": "npx microbundle watch -o dest/ --sourcemap true --compress false",
+        "build": "npx microbundle -o dest/ --sourcemap false --compress true",
         "test": "npx jest --coverage",
         "test:watch": "npx jest --watch --coverage",
-        "build": "NODE_ENV=production npx webpack --progress --hide-modules",
-        "prepublishOnly": "npm run test && npm run build"
+        "clear": "rm -rf dest node_modules",
+        "prepublishOnly": "rm -rf dest && npm run build && npm run test"
     },
     "repository": {
         "type": "git",
@@ -29,33 +32,30 @@
     "engines": {
         "npm": ">=5.2.0"
     },
+    "files": [
+        "dest/*"
+    ],
     "devDependencies": {
         "@babel/cli": "7.2.3",
         "@babel/core": "7.3.4",
-        "@babel/plugin-proposal-class-properties": "7.3.4",
         "@babel/plugin-proposal-object-rest-spread": "7.3.4",
-        "@babel/plugin-transform-async-to-generator": "7.3.4",
-        "@babel/plugin-transform-react-constant-elements": "7.2.0",
-        "@babel/plugin-transform-react-inline-elements": "7.2.0",
-        "@babel/plugin-transform-runtime": "7.3.4",
         "@babel/preset-env": "7.3.4",
         "@babel/preset-react": "7.0.0",
         "@babel/runtime": "7.3.4",
-        "babel-loader": "8.0.5",
-        "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
         "enzyme": "3.9.0",
         "enzyme-adapter-react-16": "1.11.2",
         "enzyme-to-json": "3.3.5",
         "jest": "24.5.0",
-        "prop-types": "15.7.2",
+        "microbundle": "0.11.0",
         "react": "16.8.4",
         "react-dom": "16.8.4",
         "react-hooks-testing-library": "0.3.7",
-        "react-testing-library": "6.0.0",
+        "rollup-plugin-babel": "4.3.2",
         "webpack": "4.29.6",
         "webpack-cli": "3.3.0"
     },
     "peerDependencies": {
         "react": ">=16.8.0"
-    }
+    },
+    "dependencies": {}
 }

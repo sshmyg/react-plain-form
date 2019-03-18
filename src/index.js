@@ -12,6 +12,8 @@ import useEventUid from './hooks/useEventUid';
 import useValidating from './hooks/useValidating';
 import useFields from './hooks/useFields';
 
+import runPromisesSequence from './helpers/runPromisesSequence';
+
 /*
     TODO:
     1. How to understand valid form on submit or not, if some fields not touched
@@ -54,40 +56,45 @@ export function useForm(schema) {
         setValue(name, value);
         updateEvent('change');
     }, [fieldsProps]);
-    const validateAll = useCallback(async values => {
+    const validateAll = useCallback(values => {
         let errors;
 
-        for (const name of Object.keys(fieldsProps)) {
+        const promisesSequence = Object.keys(fieldsProps).reduce((acc, name, i) => {
             const { onValidate } = fieldsProps[name] || {};
 
-            if (typeof onValidate !== 'function') {
-                continue;
+            if (!onValidate) {
+                return acc;
             }
 
-            setValidating(name, true);
+            acc.push(() => {
+                setValidating(name, true);
 
-            try {
-                await onValidate(values);
-                setValidating(name, false);
-            } catch (err) {
-                !errors && (errors = {});
+                return onValidate(values)
+                    .then(() => setValidating(name, false))
+                    .catch(err => {
+                        !errors && (errors = {});
 
-                errors[name] = err.message;
+                        errors[name] = err.message;
 
-                setValidating(name, false);
-            }
-        }
+                        setValidating(name, false);
 
-        if (errors) {
-            setErrors(errors);
+                        return Promise.reject(err);
+                    });
+            });
 
-            const err = new Error('Errors occured, see `errors` param for details');
-            err.errors = errors;
+            return acc;
+        }, []);
 
-            return Promise.reject(err);
-        }
+        return runPromisesSequence(promisesSequence)
+            .then(() => Promise.resolve(values))
+            .catch(() => {
+                setErrors(errors);
 
-        return Promise.resolve(values);
+                const err = new Error('Errors occured, see `errors` param for details');
+                err.errors = errors;
+
+                return Promise.reject(err);
+            });
     }, [ fieldsProps ]);
     const activeFieldAttrs = fieldsAttrs[activeName];
 
