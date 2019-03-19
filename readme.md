@@ -5,6 +5,7 @@ React simple form for everyday usage 😜
 - [Simple usage](https://codesandbox.io/s/64y1jo66on)
 - [Debounced validation](https://codesandbox.io/s/1o780z69l3)
 - [Custom validation](https://codesandbox.io/s/lprrqkjnm7) - lib [yup](https://github.com/jquense/yup)
+- [Advanced usage](https://codesandbox.io/s/647zqqx0w3)
 
 ## useForm({ schema })
 | Name | Type | Defaults | Description |
