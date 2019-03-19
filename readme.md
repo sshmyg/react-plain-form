@@ -12,6 +12,16 @@ React simple form for everyday usage 😜
 | `schema[value].[any]` | `Object` | `undefined` | Any valid html5 attributes |
 | `schema[value].onValidate` | `Function` | `undefined` | validation function. Get `values` as argument and should return Promise. |
 | `schema[value].validateOn` | `String|Array` | `change` | Validation run on this events. Variants: `change|focus|blur` |
+| `schema[value].defaultValue` | `String` | `''` | Default value 
+
+## const {...} = useForm({ schema })
+| Name | Type | Defaults | Description |
+| ------------- | ------- | :-------------:| :----- |
+| `fields` | `Object` | `undefined` | Configuration object for you form |
+| `schema[key]` | `String` | `undefined` | `name` prop for future input field |
+| `schema[value].[any]` | `Object` | `undefined` | Any valid html5 attributes |
+| `schema[value].onValidate` | `Function` | `undefined` | validation function. Get `values` as argument and should return Promise. |
+| `schema[value].validateOn` | `String or Array` | `change` | Validation run on this events. Variants: `change|focus|blur` |
 
 ### Example
 ```javascript
