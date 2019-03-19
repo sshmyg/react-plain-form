@@ -4,7 +4,7 @@ import {
     act
 } from 'react-hooks-testing-library';
 
-import { useForm } from './index';
+import useForm from './index';
 
 const fields = {
     name: {

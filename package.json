@@ -7,8 +7,8 @@
     "module": "dest/react-plain-form.m.js",
     "source": "src/index.js",
     "scripts": {
-        "start": "npx microbundle watch -o dest/ --sourcemap true --compress false",
-        "build": "npx microbundle -o dest/ --sourcemap false --compress true",
+        "start": "npx microbundle watch -o dest --sourcemap=false",
+        "build": "npx microbundle -o dest --sourcemap=false",
         "test": "npx jest --coverage",
         "test:watch": "npx jest --watch --coverage",
         "clear": "rm -rf dest node_modules",
