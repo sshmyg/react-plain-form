@@ -17,6 +17,7 @@ import runPromisesSequence from './helpers/runPromisesSequence';
 /*
     TODO:
     1. How to understand valid form on submit or not, if some fields not touched
+    2. validating... is true when debounced onValidation
 */
 
 const checkTypes = ['radio', 'checkbox'];
