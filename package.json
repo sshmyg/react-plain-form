@@ -1,6 +1,6 @@
 {
     "name": "react-plain-form",
-    "version": "2.0.0",
+    "version": "2.0.0-beta",
     "description": "React simple form for everyday usage 😜",
     "main": "dest/react-plain-form.js",
     "umd:main": "dest/react-plain-form.umd.js",
