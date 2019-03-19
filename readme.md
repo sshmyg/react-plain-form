@@ -2,7 +2,7 @@
 React simple form for everyday usage 😜
 
 # Demo
-[Simple example](https://codesandbox.io/s/2vx51qq50r)
+[Simple example](https://codesandbox.io/s/64y1jo66on)
 
 ## useForm({ schema })
 | Name | Type | Defaults | Description |
@@ -27,23 +27,27 @@ function Form({ schema }) {
         errors
     } = useForm(schema);
     const isErrors = !!Object.keys(errors).length;
-
-    console.info(values);
+    const handleSubmit = e => {
+        e && e.preventDefault();
+        console.log(values);
+    };
 
     return (
-        <form>
+        <form onSubmit={handleSubmit}>
             <label>
                 Name
                 <input {...fields.name} />
+                {errors.name && <span>{errors.name}</span>}
             </label>
             <label>
                 Email
-                <input {...fields.Email} />
+                <input {...fields.email} />
+                {errors.email && <span>{errors.email}</span>}
             </label>
             <br/>
             <button
                 type="submit"
-                disabled={isValidating || !isErrors}
+                disabled={isValidating || isErrors}
             >
                 Submit
             </button>
