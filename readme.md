@@ -1,37 +1,77 @@
 # React plain form
 React simple form for everyday usage 😜
 
-
 # Demo
 [Simple example](https://codesandbox.io/s/2vx51qq50r)
 
-## Parameters
+## useForm({ schema })
 | Name | Type | Defaults | Description |
 | ------------- | ------- | :-------------:| :----- |
-| `defaultValues` | `Object` | `undefined` | Key is input name, value id default input value |
-| `validateOnChange` | `Boolean` | `true` | Validate on input change or not |
-| `onValidation` | `Function` | `(name, value) => new Promise(res => res(true))` | Invoke on every single field during validation process. Get 2 arguments, `name`, 'value' and should return Promise in appropriate state (resolved or rejected). Reject should contains `{name: 'error'}` with name as key and value as error description |
-| `onSubmit` | `Function` | `() => {}` | Invoke on form submit, if there are no errors and form validating isn't in progress. Get single argument - object with form values |
+| `schema` | `Object` | `undefined` | Configuration object for you form |
+| `schema[key]` | `String` | `undefined` | `name` prop for future input field |
+| `schema[value].[any]` | `Object` | `undefined` | Any valid html5 attributes |
+| `schema[value].onValidate` | `Function` | `undefined` | validation function. Get `values` as argument and should return Promise. |
+| `schema[value].validateOn` | `String|Array` | `change` | Validation run on this events. Variants: `change|focus|blur` |
 
 ### Example
 ```javascript
-import PlainForm from 'react-plain-form';
+import React from 'react';
+import { render } from 'react-dom';
+import useForm from 'react-plain-form';
 
-<PlainForm
-    defaultValues={{
-        name: 'Foo',
-        sname: 'Bar'
-    }}
-    onValidation={(name, value) => {
-        return new Promise((res, rej) => {
-            !value
-                ? rej({ [name]: 'Field require' })
-                : res()
-        })
-    }}
-    onSubmit={formData => {
-        console.log(formData)
-    }}
->
-</PlainForm>
+function Form({ schema }) {
+    const {
+        fields,
+        values,
+        isValidating,
+        errors
+    } = useForm(schema);
+    const isErrors = !!Object.keys(errors).length;
+
+    console.info(values);
+
+    return (
+        <form>
+            <label>
+                Name
+                <input {...fields.name} />
+            </label>
+            <label>
+                Email
+                <input {...fields.Email} />
+            </label>
+            <br/>
+            <button
+                type="submit"
+                disabled={isValidating || !isErrors}
+            >
+                Submit
+            </button>
+            { isValidating && <p>Validating...</p> }
+        </form>
+    );
+}
+
+const formSchema = {
+    name: { type: 'text' },
+
+    email: {
+        type: 'email',
+        onValidate: values => {
+            return new Promise((res, rej) => {
+                const isValidEmail = (/^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,5})$/).test(values.email);
+
+                isValidEmail
+                    ? res()
+                    : rej(new Error('Invalid email'));
+            });
+        }
+    }
+};
+
+render(
+    <Form schema={formSchema} />,
+    document.querySelector('#root')
+);
+
 ```

@@ -6,8 +6,7 @@ const webpack = require('webpack');
 const ENV = process.env.NODE_ENV || 'development';
 
 module.exports = {
-    context: path.join(process.cwd(), 'src'),
-    entry: './index.js',
+    entry: './src/index.js',
     cache: true,
     devtool: 'hidden',
     mode: ENV,
@@ -20,7 +19,7 @@ module.exports = {
     },
 
     output: {
-        path: path.join(process.cwd(), 'dist'),
+        path: path.join(__dirname, 'dest'),
         filename: 'index.js',
         libraryTarget: 'commonjs2'
     },
@@ -47,24 +46,7 @@ module.exports = {
     ],
 
     externals: {
-        react: {
-            root: 'React',
-            commonjs2: 'react',
-            commonjs: 'react',
-            amd: 'react'
-        },
-        'prop-types': {
-            root: 'PropTypes',
-            commonjs2: 'prop-types',
-            commonjs: 'prop-types',
-            amd: 'prop-types'
-        }
-    },
-
-    devServer: {
-        contentBase: path.join(__dirname, 'dev'),
-        historyApiFallback: true,
-        open: true
+        react: 'commonjs react'
     }
 };
 
