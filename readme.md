@@ -1,7 +1,7 @@
 # React plain form
 React simple form for everyday usage 😜
 
-# Demo:
+# Demo
 - [Simple usage](https://codesandbox.io/s/64y1jo66on)
 - [Debounced validation](https://codesandbox.io/s/1o780z69l3)
 - [Custom validation](https://codesandbox.io/s/lprrqkjnm7) - lib [yup](https://github.com/jquense/yup)
