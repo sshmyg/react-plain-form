@@ -6,4 +6,6 @@ Thumbs.db
 node_modules/*
 coverage
 dest
+package-lock.json
+yarn.lock
 

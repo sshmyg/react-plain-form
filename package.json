@@ -1,6 +1,6 @@
 {
     "name": "react-plain-form",
-    "version": "2.0.0-beta",
+    "version": "2.0.2-beta",
     "description": "React simple form for everyday usage 😜",
     "main": "dest/react-plain-form.js",
     "umd:main": "dest/react-plain-form.umd.js",
@@ -36,23 +36,23 @@
         "dest/*"
     ],
     "devDependencies": {
-        "@babel/cli": "7.2.3",
-        "@babel/core": "7.3.4",
-        "@babel/plugin-proposal-object-rest-spread": "7.3.4",
-        "@babel/preset-env": "7.3.4",
+        "@babel/cli": "7.5.5",
+        "@babel/core": "7.5.5",
+        "@babel/plugin-proposal-object-rest-spread": "7.5.5",
+        "@babel/preset-env": "7.5.5",
         "@babel/preset-react": "7.0.0",
-        "@babel/runtime": "7.3.4",
-        "enzyme": "3.9.0",
-        "enzyme-adapter-react-16": "1.11.2",
-        "enzyme-to-json": "3.3.5",
-        "jest": "24.5.0",
+        "@babel/runtime": "7.5.5",
+        "enzyme": "3.10.0",
+        "enzyme-adapter-react-16": "1.14.0",
+        "enzyme-to-json": "3.4.0",
+        "jest": "24.8.0",
         "microbundle": "0.11.0",
-        "react": "16.8.4",
-        "react-dom": "16.8.4",
-        "react-hooks-testing-library": "0.3.7",
-        "rollup-plugin-babel": "4.3.2",
-        "webpack": "4.29.6",
-        "webpack-cli": "3.3.0"
+        "react": "16.9.0",
+        "react-dom": "16.9.0",
+        "react-hooks-testing-library": "0.6.0",
+        "rollup-plugin-babel": "4.3.3",
+        "webpack": "4.39.1",
+        "webpack-cli": "3.3.6"
     },
     "peerDependencies": {
         "react": ">=16.8.0"
