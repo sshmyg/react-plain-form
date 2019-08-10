@@ -20,7 +20,7 @@ import runPromisesSequence from './helpers/runPromisesSequence';
     2. validating... is true when debounced onValidation
 */
 
-const checkTypes = ['radio', 'checkbox'];
+const checkTypes = [ 'radio', 'checkbox' ];
 
 /**
  * useForm
@@ -30,10 +30,10 @@ const checkTypes = ['radio', 'checkbox'];
  * @param {String|Array} [schema.validateOn]="change" - events for validation, could be `change|focus|blur`
  */
 export default function useForm(schema) {
-    const [eventData, updateEvent] = useEventUid();
-    const [values, setValue, setValues] = useValues();
-    const [activeName, setActiveName] = useState();
-    const [errors, setError, setErrors] = useErrors();
+    const [ eventData, updateEvent ] = useEventUid();
+    const [ values, setValue, setValues ] = useValues();
+    const [ activeName, setActiveName ] = useState();
+    const [ errors, setError, setErrors ] = useErrors();
     const isMount = useRef(false);
     const prevActiveName = usePrevious(activeName);
     const {
@@ -46,7 +46,7 @@ export default function useForm(schema) {
         setValues,
         values
     });
-    const [isValidating, setValidating] = useValidating();
+    const [ isValidating, setValidating ] = useValidating();
     const setValueCustom = useCallback((name, value) => {
         const { ref } = fieldsProps[name] || {};
 
@@ -56,11 +56,15 @@ export default function useForm(schema) {
 
         setValue(name, value);
         updateEvent('change');
-    }, [fieldsProps]);
+    }, [
+        fieldsProps,
+        setValue,
+        updateEvent
+    ]);
     const validateAll = useCallback(values => {
         let errors;
 
-        const promisesSequence = Object.keys(fieldsProps).reduce((acc, name, i) => {
+        const promisesSequence = Object.keys(fieldsProps).reduce((acc, name) => {
             const { onValidate } = fieldsProps[name] || {};
 
             if (!onValidate) {
@@ -96,7 +100,11 @@ export default function useForm(schema) {
 
                 return Promise.reject(err);
             });
-    }, [ fieldsProps ]);
+    }, [
+        fieldsProps,
+        setErrors,
+        setValidating
+    ]);
     const activeFieldAttrs = fieldsAttrs[activeName];
 
     //Update value
@@ -146,7 +154,7 @@ export default function useForm(schema) {
                 setValidating(actualCurrentName, false);
                 setError(actualCurrentName, err.message);
             });
-    }, [eventData.uid]);
+    }, [ eventData.uid ]);
 
     return {
         isValidating,
