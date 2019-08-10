@@ -1,8 +1,6 @@
 import {
-    renderHook,
-    cleanup,
-    act
-} from 'react-hooks-testing-library';
+    renderHook
+} from '@testing-library/react-hooks';
 
 import useForm from './index';
 
@@ -21,8 +19,6 @@ function getType(i) {
 }
 
 describe('useForm', () => {
-    afterEach(cleanup);
-
     it('useForm should return fields', () => {
         const { result } = renderHook(() => useForm(fields));
 
